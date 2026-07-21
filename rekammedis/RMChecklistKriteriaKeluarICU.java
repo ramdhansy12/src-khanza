@@ -27,8 +27,12 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -49,11 +53,12 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
     private validasi Valid=new validasi();
     private PreparedStatement ps;
     private ResultSet rs;
-    private int i=0;    
-    private DlgCariPegawai pegawai=new DlgCariPegawai(null,false);
+    private int i=0;  
     private String finger="";
     private StringBuilder htmlContent;
     private String TANGGALMUNDUR="yes";
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     /** Creates new form DlgRujuk
      * @param parent
      * @param modal */
@@ -67,7 +72,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
             "No.Rawat","No.RM","Nama Pasien","Tgl.Lahir","J.K.","Tanggal","Tidak Lagi Memerlukan Perawatan ICU","Kondisi Pasien Yang Menyebabkan Pasien Dirawat Di ICU Telah Teratasi",
             "Pasien Dalam Keadaan Terminal Yang Dengan Terapi Tidak Memberikan Hasil Yang Bermakna","Pasien Meninggal","Pasien Membutuhkan Alat / Prosedur Yang Tidak Tersedia",
             "Keluarga Menghendaki Pasien Dipindahkan","Nadi > 60 Atau < 100 x/menit","SBP > 08 mmHg Atau 20 mmHg Di Atas SBP Pasien","MAP > 60 mmHg","DBP < 120 mmHg",
-            "RR > 12 Sampai < 25 x/menit","NIP/Kode Dokter","DPJP/Dokter Jaga/ICU","Keterangan"
+            "RR > 12 Sampai < 25 x/menit","NIP/Kode Dokter","DPJP/Dokter Jaga/ICU"
         }){
               @Override public boolean isCellEditable(int rowIndex, int colIndex){return false;}
         };
@@ -77,7 +82,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         tbObat.setPreferredScrollableViewportSize(new Dimension(500,500));
         tbObat.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        for (i = 0; i < 20; i++) {
+        for (i = 0; i < 19; i++) {
             TableColumn column = tbObat.getColumnModel().getColumn(i);
             if(i==0){
                 column.setPreferredWidth(105);
@@ -94,8 +99,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
             }else if(i==17){
                 column.setPreferredWidth(90);
             }else if(i==18){
-                column.setPreferredWidth(90);
-            }else if(i==19){
                 column.setPreferredWidth(150);
             }else{
                 column.setPreferredWidth(100);
@@ -105,53 +108,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
 
         TNoRw.setDocument(new batasInput((byte)17).getKata(TNoRw));
         TCari.setDocument(new batasInput((int)100).getKata(TCari));
-        
-        if(koneksiDB.CARICEPAT().equals("aktif")){
-            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-            });
-        }
-        
-        pegawai.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(pegawai.getTable().getSelectedRow()!= -1){  
-                    KodePetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),0).toString());
-                    NamaPetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),1).toString());
-                    btnPetugas.requestFocus();
-                }  
-                    
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        }); 
         
         ChkInput.setSelected(false);
         isForm();
@@ -264,9 +220,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         jLabel75 = new widget.Label();
         jLabel76 = new widget.Label();
         jLabel77 = new widget.Label();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        Keterangan = new javax.swing.JTextArea();
-        jLabel78 = new widget.Label();
 
         jPopupMenu1.setName("jPopupMenu1"); // NOI18N
 
@@ -296,6 +249,11 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Data Check List Kriteria Keluar ICU ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setFont(new java.awt.Font("Tahoma", 2, 12)); // NOI18N
@@ -463,7 +421,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-01-2026" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -477,7 +435,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-01-2026" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -568,9 +526,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         FormInput.setBackground(new java.awt.Color(250, 255, 245));
         FormInput.setBorder(null);
         FormInput.setName("FormInput"); // NOI18N
-        FormInput.setPreferredSize(new java.awt.Dimension(100, 300));
-        FormInput.setRequestFocusEnabled(false);
-        FormInput.setVerifyInputWhenFocusTarget(false);
+        FormInput.setPreferredSize(new java.awt.Dimension(100, 203));
         FormInput.setLayout(null);
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -628,7 +584,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         TglLahir.setBounds(689, 10, 100, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "15-01-2026 09:10:16" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026 13:41:03" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -821,10 +777,10 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         Kriteria6.setBounds(710, 140, 80, 23);
 
         jLabel70.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel70.setText("Keterangan :");
+        jLabel70.setText("MAP > 60 mmHg");
         jLabel70.setName("jLabel70"); // NOI18N
         FormInput.add(jLabel70);
-        jLabel70.setBounds(800, 100, 70, 23);
+        jLabel70.setBounds(15, 200, 100, 23);
 
         jLabel69.setText("Keluarga Menghendaki Pasien Dipindahkan :");
         jLabel69.setName("jLabel69"); // NOI18N
@@ -886,23 +842,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         jLabel77.setName("jLabel77"); // NOI18N
         FormInput.add(jLabel77);
         jLabel77.setBounds(0, 170, 169, 23);
-
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-
-        Keterangan.setColumns(20);
-        Keterangan.setRows(5);
-        Keterangan.setDisabledTextColor(new java.awt.Color(255, 255, 255));
-        Keterangan.setName("Keterangan"); // NOI18N
-        jScrollPane1.setViewportView(Keterangan);
-
-        FormInput.add(jScrollPane1);
-        jScrollPane1.setBounds(880, 50, 430, 130);
-
-        jLabel78.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel78.setText("MAP > 60 mmHg");
-        jLabel78.setName("jLabel78"); // NOI18N
-        FormInput.add(jLabel78);
-        jLabel78.setBounds(15, 200, 100, 23);
 
         scrollInput.setViewportView(FormInput);
 
@@ -1003,8 +942,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
                     ganti();
                 }else {
                     if(akses.getkode().equals(tbObat.getValueAt(tbObat.getSelectedRow(),17).toString())){
-//                        if(Sequel.cekTanggal48jam(tbObat.getValueAt(tbObat.getSelectedRow(),5).toString(),Sequel.ambiltanggalsekarang())==true)
-                        {
+                        if(Sequel.cekTanggal48jam(tbObat.getValueAt(tbObat.getSelectedRow(),5).toString(),Sequel.ambiltanggalsekarang())==true){
                             if(TanggalRegistrasi.getText().equals("")){
                                 TanggalRegistrasi.setText(Sequel.cariIsi("select concat(reg_periksa.tgl_registrasi,' ',reg_periksa.jam_reg) from reg_periksa where reg_periksa.no_rawat=?",TNoRw.getText()));
                             }
@@ -1031,7 +969,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
 }//GEN-LAST:event_BtnEditKeyPressed
 
     private void BtnKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnKeluarActionPerformed
-        pegawai.dispose();
         dispose();
 }//GEN-LAST:event_BtnKeluarActionPerformed
 
@@ -1070,7 +1007,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
                         "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>RR > 12 Sampai < 25 x/menit</b></td>"+
                         "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>NIP/Kode Dokter</b></td>"+
                         "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>DPJP/Dokter Jaga/ICU</b></td>"+
-                        "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Keterangan</b></td>"+
                     "</tr>"
                 );
                 
@@ -1096,7 +1032,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
                             "<td valign='top'>"+tbObat.getValueAt(i,16).toString()+"</td>"+
                             "<td valign='top'>"+tbObat.getValueAt(i,17).toString()+"</td>"+
                             "<td valign='top'>"+tbObat.getValueAt(i,18).toString()+"</td>"+
-                             "<td valign='top'>"+tbObat.getValueAt(i,19).toString()+"</td>"+
                         "</tr>");
                 }
                 
@@ -1167,7 +1102,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
 }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -1180,12 +1115,12 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
 
     private void BtnAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAllActionPerformed
         TCari.setText("");
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
-            tampil();
+            runBackground(() ->tampil());
             TCari.setText("");
         }else{
             Valid.pindah(evt, BtnCari, TPasien);
@@ -1233,7 +1168,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
                     "checklist_kriteria_keluar_icu.kriteria1,checklist_kriteria_keluar_icu.kriteria2,checklist_kriteria_keluar_icu.kriteria3,"+
                     "checklist_kriteria_keluar_icu.kriteria4,checklist_kriteria_keluar_icu.kriteria5,checklist_kriteria_keluar_icu.kriteria6,"+
                     "checklist_kriteria_keluar_icu.kriteria7,checklist_kriteria_keluar_icu.kriteria8,checklist_kriteria_keluar_icu.kriteria9,"+
-                    "checklist_kriteria_keluar_icu.kriteria10,checklist_kriteria_keluar_icu.kriteria11,checklist_kriteria_keluar_icu.nik,pegawai.nama,checklist_kriteria_keluar_icu.keterangan "+
+                    "checklist_kriteria_keluar_icu.kriteria10,checklist_kriteria_keluar_icu.kriteria11,checklist_kriteria_keluar_icu.nik,pegawai.nama "+
                     "from checklist_kriteria_keluar_icu inner join reg_periksa on checklist_kriteria_keluar_icu.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join pegawai on pegawai.nik=checklist_kriteria_keluar_icu.nik "+
@@ -1250,6 +1185,30 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
     }//GEN-LAST:event_TanggalKeyPressed
 
     private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPetugasActionPerformed
+        DlgCariPegawai pegawai=new DlgCariPegawai(null,false);
+        pegawai.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(pegawai.getTable().getSelectedRow()!= -1){  
+                    KodePetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),0).toString());
+                    NamaPetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),1).toString());
+                    btnPetugas.requestFocus();
+                }  
+                    
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        }); 
         pegawai.emptTeks();
         pegawai.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         pegawai.setLocationRelativeTo(internalFrame1);
@@ -1304,6 +1263,31 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         Valid.pindah(evt,Kriteria6,Kriteria8);
     }//GEN-LAST:event_Kriteria7KeyPressed
 
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        if(koneksiDB.CARICEPAT().equals("aktif")){
+            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+            });
+        }
+    }//GEN-LAST:event_formWindowOpened
+
     /**
     * @param args the command line arguments
     */
@@ -1334,7 +1318,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
     private widget.Tanggal DTPCari2;
     private widget.PanelBiasa FormInput;
     private widget.TextBox JK;
-    private javax.swing.JTextArea Keterangan;
     private widget.TextBox KodePetugas;
     private widget.ComboBox Kriteria1;
     private widget.ComboBox Kriteria10;
@@ -1386,11 +1369,9 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
     private widget.Label jLabel75;
     private widget.Label jLabel76;
     private widget.Label jLabel77;
-    private widget.Label jLabel78;
     private widget.Label jLabel8;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPopupMenu jPopupMenu1;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private widget.panelisi panelGlass8;
@@ -1408,7 +1389,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
                     "checklist_kriteria_keluar_icu.kriteria1,checklist_kriteria_keluar_icu.kriteria2,checklist_kriteria_keluar_icu.kriteria3,"+
                     "checklist_kriteria_keluar_icu.kriteria4,checklist_kriteria_keluar_icu.kriteria5,checklist_kriteria_keluar_icu.kriteria6,"+
                     "checklist_kriteria_keluar_icu.kriteria7,checklist_kriteria_keluar_icu.kriteria8,checklist_kriteria_keluar_icu.kriteria9,"+
-                    "checklist_kriteria_keluar_icu.kriteria10,checklist_kriteria_keluar_icu.kriteria11,checklist_kriteria_keluar_icu.nik,pegawai.nama,checklist_kriteria_keluar_icu.keterangan "+
+                    "checklist_kriteria_keluar_icu.kriteria10,checklist_kriteria_keluar_icu.kriteria11,checklist_kriteria_keluar_icu.nik,pegawai.nama "+
                     "from checklist_kriteria_keluar_icu inner join reg_periksa on checklist_kriteria_keluar_icu.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join pegawai on pegawai.nik=checklist_kriteria_keluar_icu.nik "+
@@ -1419,7 +1400,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
                     "checklist_kriteria_keluar_icu.kriteria1,checklist_kriteria_keluar_icu.kriteria2,checklist_kriteria_keluar_icu.kriteria3,"+
                     "checklist_kriteria_keluar_icu.kriteria4,checklist_kriteria_keluar_icu.kriteria5,checklist_kriteria_keluar_icu.kriteria6,"+
                     "checklist_kriteria_keluar_icu.kriteria7,checklist_kriteria_keluar_icu.kriteria8,checklist_kriteria_keluar_icu.kriteria9,"+
-                    "checklist_kriteria_keluar_icu.kriteria10,checklist_kriteria_keluar_icu.kriteria11,checklist_kriteria_keluar_icu.nik,pegawai.nama,checklist_kriteria_keluar_icu.keterangan "+
+                    "checklist_kriteria_keluar_icu.kriteria10,checklist_kriteria_keluar_icu.kriteria11,checklist_kriteria_keluar_icu.nik,pegawai.nama "+
                     "from checklist_kriteria_keluar_icu inner join reg_periksa on checklist_kriteria_keluar_icu.no_rawat=reg_periksa.no_rawat "+
                     "inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
                     "inner join pegawai on pegawai.nik=checklist_kriteria_keluar_icu.nik "+
@@ -1447,7 +1428,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
                         rs.getString("no_rawat"),rs.getString("no_rkm_medis"),rs.getString("nm_pasien"),rs.getDate("tgl_lahir"),rs.getString("jk"),
                         rs.getString("tanggal"),rs.getString("kriteria1"),rs.getString("kriteria2"),rs.getString("kriteria3"),rs.getString("kriteria4"),
                         rs.getString("kriteria5"),rs.getString("kriteria6"),rs.getString("kriteria7"),rs.getString("kriteria8"),rs.getString("kriteria9"),
-                        rs.getString("kriteria10"),rs.getString("kriteria11"),rs.getString("nik"),rs.getString("nama"),rs.getString("keterangan")
+                        rs.getString("kriteria10"),rs.getString("kriteria11"),rs.getString("nik"),rs.getString("nama")
                     });
                 }
             } catch (Exception e) {
@@ -1480,9 +1461,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         Kriteria11.setSelectedItem("Ya");
         Tanggal.setDate(new Date());
         Kriteria1.requestFocus();
-        Keterangan.setText("");
-        
-       
     } 
 
     private void getData() {
@@ -1503,8 +1481,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
             Kriteria9.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(),14).toString());
             Kriteria10.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(),15).toString());
             Kriteria11.setSelectedItem(tbObat.getValueAt(tbObat.getSelectedRow(),16).toString());
-            Keterangan.setText(tbObat.getValueAt(tbObat.getSelectedRow(),19).toString());
-           
             Valid.SetTgl2(Tanggal,tbObat.getValueAt(tbObat.getSelectedRow(),5).toString());
         }
     }
@@ -1572,7 +1548,7 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
         if(akses.getjml2()>=1){
             btnPetugas.setEnabled(false);
             KodePetugas.setText(akses.getkode());
-            NamaPetugas.setText(pegawai.tampil3(akses.getkode()));
+            NamaPetugas.setText(Sequel.CariPegawai(akses.getkode()));
         }
         if(TANGGALMUNDUR.equals("no")){
             if(!akses.getkode().equals("Admin Utama")){
@@ -1584,11 +1560,11 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
 
     private void ganti() {
         if(Sequel.mengedittf("checklist_kriteria_keluar_icu","no_rawat=? and tanggal=?","no_rawat=?,tanggal=?,kriteria1=?,kriteria2=?,kriteria3=?,kriteria4=?,kriteria5=?,"+
-                "kriteria6=?,kriteria7=?,kriteria8=?,kriteria9=?,kriteria10=?,kriteria11=?,nik=?,keterangan=?",17,new String[]{
+                "kriteria6=?,kriteria7=?,kriteria8=?,kriteria9=?,kriteria10=?,kriteria11=?,nik=?",16,new String[]{
                 TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+"")+" "+Tanggal.getSelectedItem().toString().substring(11,19),Kriteria1.getSelectedItem().toString(),
                 Kriteria2.getSelectedItem().toString(),Kriteria3.getSelectedItem().toString(),Kriteria4.getSelectedItem().toString(),Kriteria5.getSelectedItem().toString(),
                 Kriteria6.getSelectedItem().toString(),Kriteria7.getSelectedItem().toString(),Kriteria8.getSelectedItem().toString(),Kriteria9.getSelectedItem().toString(),
-                Kriteria10.getSelectedItem().toString(),Kriteria11.getSelectedItem().toString(),KodePetugas.getText(),Keterangan.getText(),tbObat.getValueAt(tbObat.getSelectedRow(),0).toString(),
+                Kriteria10.getSelectedItem().toString(),Kriteria11.getSelectedItem().toString(),KodePetugas.getText(),tbObat.getValueAt(tbObat.getSelectedRow(),0).toString(),
                 tbObat.getValueAt(tbObat.getSelectedRow(),5).toString()
         })==true){
             tbObat.setValueAt(TNoRw.getText(),tbObat.getSelectedRow(),0);
@@ -1610,8 +1586,6 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
             tbObat.setValueAt(Kriteria11.getSelectedItem().toString(),tbObat.getSelectedRow(),16);
             tbObat.setValueAt(KodePetugas.getText(),tbObat.getSelectedRow(),17);
             tbObat.setValueAt(NamaPetugas.getText(),tbObat.getSelectedRow(),18);
-            tbObat.setValueAt(Keterangan.getText(),tbObat.getSelectedRow(),19);
-            
             emptTeks();
         }
     }
@@ -1629,20 +1603,52 @@ public final class RMChecklistKriteriaKeluarICU extends javax.swing.JDialog {
     }
 
     private void simpan() {
-        if(Sequel.menyimpantf("checklist_kriteria_keluar_icu","?,?,?,?,?,?,?,?,?,?,?,?,?,?,?","Data",15,new String[]{
+        if(Sequel.menyimpantf("checklist_kriteria_keluar_icu","?,?,?,?,?,?,?,?,?,?,?,?,?,?","Data",14,new String[]{
             TNoRw.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+"")+" "+Tanggal.getSelectedItem().toString().substring(11,19),Kriteria1.getSelectedItem().toString(),
             Kriteria2.getSelectedItem().toString(),Kriteria3.getSelectedItem().toString(),Kriteria4.getSelectedItem().toString(),Kriteria5.getSelectedItem().toString(),
             Kriteria6.getSelectedItem().toString(),Kriteria7.getSelectedItem().toString(),Kriteria8.getSelectedItem().toString(),Kriteria9.getSelectedItem().toString(),
-            Kriteria10.getSelectedItem().toString(),Kriteria11.getSelectedItem().toString(),KodePetugas.getText(),Keterangan.getText(),
+            Kriteria10.getSelectedItem().toString(),Kriteria11.getSelectedItem().toString(),KodePetugas.getText()
         })==true){
             tabMode.addRow(new Object[]{
                 TNoRw.getText(),TNoRM.getText(),TPasien.getText(),TglLahir.getText(),JK.getText(),Valid.SetTgl(Tanggal.getSelectedItem()+"")+" "+Tanggal.getSelectedItem().toString().substring(11,19),
                 Kriteria1.getSelectedItem().toString(),Kriteria2.getSelectedItem().toString(),Kriteria3.getSelectedItem().toString(),Kriteria4.getSelectedItem().toString(),Kriteria5.getSelectedItem().toString(),
                 Kriteria6.getSelectedItem().toString(),Kriteria7.getSelectedItem().toString(),Kriteria8.getSelectedItem().toString(),Kriteria9.getSelectedItem().toString(),Kriteria10.getSelectedItem().toString(),
-                Kriteria11.getSelectedItem().toString(),KodePetugas.getText(),NamaPetugas.getText(),Keterangan.getText(),
+                Kriteria11.getSelectedItem().toString(),KodePetugas.getText(),NamaPetugas.getText()
             });
             LCount.setText(""+tabMode.getRowCount());
             emptTeks();
         } 
+    }
+    
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        if (executor.isShutdown() || executor.isTerminated()) return;
+        if (!isDisplayable()) return;
+
+        ceksukses = true;
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        try {
+            executor.submit(() -> {
+                try {
+                    task.run();
+                } finally {
+                    ceksukses = false;
+                    SwingUtilities.invokeLater(() -> {
+                        if (isDisplayable()) {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    });
+                }
+            });
+        } catch (RejectedExecutionException ex) {
+            ceksukses = false;
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        executor.shutdownNow();
+        super.dispose();
     }
 }
