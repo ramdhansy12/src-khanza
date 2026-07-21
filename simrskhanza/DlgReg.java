@@ -390,7 +390,7 @@ public final class DlgReg extends javax.swing.JDialog {
                  java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, 
                  java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, 
                  java.lang.Object.class,java.lang.Object.class,java.lang.Object.class,java.lang.Object.class,
-                 java.lang.Object.class,
+                 java.lang.Object.class
              };
              @Override
              public Class getColumnClass(int columnIndex) {
@@ -17014,6 +17014,8 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
 //                                "poliklinik.nm_poli like ? or reg_periksa.p_jawab like ? or reg_periksa.almt_pj like ? or reg_periksa.hubunganpj like ? or penjab.png_jawab like ?) "+
 //                                terbitsep+" order by "+order); 
 //                        }
+
+// yang iini untuk poli
                 if(CrPoli.getText().trim().equals("")&&CrDokter.getText().equals("")&&TCari.equals("")){
                     ps=koneksi.prepareStatement("select reg_periksa.no_reg,reg_periksa.no_rawat,reg_periksa.tgl_registrasi,reg_periksa.jam_reg,"+
                         "reg_periksa.kd_dokter,dokter.nm_dokter,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.jk,concat(reg_periksa.umurdaftar,' ',reg_periksa.sttsumur)as umur,poliklinik.nm_poli,"+
@@ -17033,7 +17035,39 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                         "poliklinik.nm_poli like ? or reg_periksa.p_jawab like ? or reg_periksa.almt_pj like ? or reg_periksa.hubunganpj like ? or penjab.png_jawab like ?) "+
                         terbitsep+" order by "+order); 
                 }
-                        try{  
+
+// ini untuk mcu 
+//if(CrPoli.getText().trim().equals("")&&CrDokter.getText().equals("")&&TCari.equals("")){
+//    ps=koneksi.prepareStatement("select reg_periksa.no_reg,reg_periksa.no_rawat,reg_periksa.tgl_registrasi,reg_periksa.jam_reg,"+
+//        "reg_periksa.kd_dokter,dokter.nm_dokter,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.jk,concat(reg_periksa.umurdaftar,' ',reg_periksa.sttsumur)as umur,poliklinik.nm_poli,"+
+//        "reg_periksa.p_jawab,reg_periksa.almt_pj,reg_periksa.hubunganpj,reg_periksa.biaya_reg,reg_periksa.stts_daftar,penjab.png_jawab,pasien.no_tlp,reg_periksa.stts,reg_periksa.status_poli, "+
+//        "reg_periksa.kd_poli,reg_periksa.kd_pj,reg_periksa.status_bayar,bridging_sep.no_sep,"+
+//        "group_concat(distinct jns_perawatan_lab.nm_perawatan separator ', ') as paket_lab "+
+//        "from reg_periksa inner join dokter on reg_periksa.kd_dokter=dokter.kd_dokter inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
+//        "inner join poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli inner join penjab on reg_periksa.kd_pj=penjab.kd_pj left join bridging_sep on bridging_sep.no_rawat=reg_periksa.no_rawat "+
+//        "left join permintaan_lab on permintaan_lab.no_rawat=reg_periksa.no_rawat "+
+//        "left join permintaan_detail_permintaan_lab on permintaan_detail_permintaan_lab.noorder=permintaan_lab.noorder "+
+//        "left join jns_perawatan_lab on jns_perawatan_lab.kd_jenis_prw=permintaan_detail_permintaan_lab.kd_jenis_prw where "+
+//        "poliklinik.kd_poli='U0074' and reg_periksa.tgl_registrasi between ? and ? "+terbitsep+
+//        " group by reg_periksa.no_rawat order by "+order); 
+//}else{
+//    ps=koneksi.prepareStatement("select reg_periksa.no_reg,reg_periksa.no_rawat,reg_periksa.tgl_registrasi,reg_periksa.jam_reg,"+
+//        "reg_periksa.kd_dokter,dokter.nm_dokter,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.jk,concat(reg_periksa.umurdaftar,' ',reg_periksa.sttsumur)as umur,poliklinik.nm_poli,"+
+//        "reg_periksa.p_jawab,reg_periksa.almt_pj,reg_periksa.hubunganpj,reg_periksa.biaya_reg,reg_periksa.stts_daftar,penjab.png_jawab,pasien.no_tlp,reg_periksa.stts,reg_periksa.status_poli, "+
+//        "reg_periksa.kd_poli,reg_periksa.kd_pj,reg_periksa.status_bayar,bridging_sep.no_sep,"+
+//        "group_concat(distinct jns_perawatan_lab.nm_perawatan separator ', ') as paket_lab "+
+//        "from reg_periksa inner join dokter on reg_periksa.kd_dokter=dokter.kd_dokter inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis "+
+//        "inner join poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli inner join penjab on reg_periksa.kd_pj=penjab.kd_pj left join bridging_sep on bridging_sep.no_rawat=reg_periksa.no_rawat "+
+//        "left join permintaan_lab on permintaan_lab.no_rawat=reg_periksa.no_rawat "+
+//        "left join permintaan_detail_permintaan_lab on permintaan_detail_permintaan_lab.noorder=permintaan_lab.noorder "+
+//        "left join jns_perawatan_lab on jns_perawatan_lab.kd_jenis_prw=permintaan_detail_permintaan_lab.kd_jenis_prw where "+
+//        "poliklinik.kd_poli='U0074' and poliklinik.nm_poli like ? and  dokter.nm_dokter like ? and reg_periksa.tgl_registrasi between ? and ? and  "+
+//        "(reg_periksa.no_reg like ? or reg_periksa.no_rawat like ? or reg_periksa.tgl_registrasi like ? or reg_periksa.kd_dokter like ? or "+
+//        "dokter.nm_dokter like ? or reg_periksa.no_rkm_medis like ? or reg_periksa.stts_daftar like ? or pasien.nm_pasien like ? or "+
+//        "poliklinik.nm_poli like ? or reg_periksa.p_jawab like ? or reg_periksa.almt_pj like ? or reg_periksa.hubunganpj like ? or penjab.png_jawab like ?) "+
+//        terbitsep+" group by reg_periksa.no_rawat order by "+order); 
+//}
+                                try{  
                             if(CrPoli.getText().trim().equals("")&&CrDokter.getText().equals("")&&TCari.equals("")){
                                 ps.setString(1,Valid.SetTgl(DTPCari1.getSelectedItem()+""));
                                 ps.setString(2,Valid.SetTgl(DTPCari2.getSelectedItem()+""));
@@ -17068,6 +17102,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                                     rs.getString(12),rs.getString(13),rs.getString(14),Valid.SetAngka(rs.getDouble(15)),
                                     rs.getString(16),rs.getString("no_tlp"),rs.getString("stts"),rs.getString("status_poli"),
                                     rs.getString("kd_poli"),rs.getString("kd_pj"),rs.getString("status_bayar"),rs.getString("no_sep")
+                                    //rs.getString("paket_lab")
                                 });
                             }   
                         }catch(Exception e){
