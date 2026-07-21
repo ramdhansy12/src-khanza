@@ -12,7 +12,6 @@ import fungsi.batasInput;
 import fungsi.koneksiDB;
 import fungsi.sekuel;
 import fungsi.validasi;
-import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
@@ -27,6 +26,11 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.awt.Cursor;
+import javax.swing.SwingUtilities;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.DocumentEvent;
@@ -49,8 +53,9 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
     private validasi Valid=new validasi();
     private PreparedStatement ps;
     private ResultSet rs;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     private int i=0;    
-    private DlgCariPegawai pegawai=new DlgCariPegawai(null,false);
     private String finger="";
     private StringBuilder htmlContent;
     private String TANGGALMUNDUR="yes";
@@ -104,53 +109,6 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
 
         TNoRw.setDocument(new batasInput((byte)17).getKata(TNoRw));
         TCari.setDocument(new batasInput((int)100).getKata(TCari));
-        
-        if(koneksiDB.CARICEPAT().equals("aktif")){
-            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-            });
-        }
-        
-        pegawai.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(pegawai.getTable().getSelectedRow()!= -1){  
-                    KodePetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),0).toString());
-                    NamaPetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),1).toString());
-                    btnPetugas.requestFocus();
-                }  
-                    
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        }); 
         
         ChkInput.setSelected(false);
         isForm();
@@ -294,6 +252,11 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Data Check List Kriteria Keluar HCU ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setFont(new java.awt.Font("Tahoma", 2, 12)); // NOI18N
@@ -461,7 +424,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "02-12-2025" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -475,7 +438,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "02-12-2025" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -624,7 +587,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
         TglLahir.setBounds(689, 10, 100, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "02-12-2025 17:13:59" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026 13:40:56" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -691,7 +654,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
         jLabel61.setText("MAP >= 60 mmHg :");
         jLabel61.setName("jLabel61"); // NOI18N
         FormInput.add(jLabel61);
-        jLabel61.setBounds(430, 140, 110, 23);
+        jLabel61.setBounds(394, 140, 110, 23);
 
         Kriteria6.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria6.setName("Kriteria6"); // NOI18N
@@ -701,13 +664,13 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria6);
-        Kriteria6.setBounds(540, 140, 80, 23);
+        Kriteria6.setBounds(508, 140, 80, 23);
 
         jLabel65.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel65.setText("Pasien Yang Sudah Tidak Memerlukan Perawatan Di Ruang HCU");
         jLabel65.setName("jLabel65"); // NOI18N
         FormInput.add(jLabel65);
-        jLabel65.setBounds(15, 80, 340, 23);
+        jLabel65.setBounds(15, 80, 330, 23);
 
         Kriteria1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria1.setName("Kriteria1"); // NOI18N
@@ -717,13 +680,13 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria1);
-        Kriteria1.setBounds(370, 80, 80, 23);
+        Kriteria1.setBounds(336, 80, 80, 23);
 
         jLabel66.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel66.setText("HR 60 - 100 x/menit (Hasil EKG Menunjukkan Perbaikan / Sinus Rithme)");
         jLabel66.setName("jLabel66"); // NOI18N
         FormInput.add(jLabel66);
-        jLabel66.setBounds(15, 110, 380, 23);
+        jLabel66.setBounds(15, 110, 370, 23);
 
         Kriteria3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria3.setName("Kriteria3"); // NOI18N
@@ -733,12 +696,12 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria3);
-        Kriteria3.setBounds(400, 110, 80, 23);
+        Kriteria3.setBounds(372, 110, 80, 23);
 
         jLabel62.setText("Gangguan Sirkulasi Teratasi :");
         jLabel62.setName("jLabel62"); // NOI18N
         FormInput.add(jLabel62);
-        jLabel62.setBounds(630, 200, 160, 23);
+        jLabel62.setBounds(546, 200, 160, 23);
 
         Kriteria12.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria12.setName("Kriteria12"); // NOI18N
@@ -748,12 +711,12 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria12);
-        Kriteria12.setBounds(800, 200, 80, 23);
+        Kriteria12.setBounds(710, 200, 80, 23);
 
         jLabel67.setText("Hypertensi Emergency Teratasi / Normal :");
         jLabel67.setName("jLabel67"); // NOI18N
         FormInput.add(jLabel67);
-        jLabel67.setBounds(550, 80, 246, 23);
+        jLabel67.setBounds(460, 80, 246, 23);
 
         Kriteria2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria2.setName("Kriteria2"); // NOI18N
@@ -763,7 +726,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria2);
-        Kriteria2.setBounds(800, 80, 80, 23);
+        Kriteria2.setBounds(710, 80, 80, 23);
 
         jLabel63.setText("Gagal Jantung Akut Teratasi :");
         jLabel63.setName("jLabel63"); // NOI18N
@@ -778,13 +741,13 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria4);
-        Kriteria4.setBounds(800, 110, 80, 23);
+        Kriteria4.setBounds(710, 110, 80, 23);
 
         jLabel68.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel68.setText("Gangguan Inotropic / Vasoaktif Gent Teratasi / Normal");
         jLabel68.setName("jLabel68"); // NOI18N
         FormInput.add(jLabel68);
-        jLabel68.setBounds(15, 140, 290, 23);
+        jLabel68.setBounds(15, 140, 280, 23);
 
         Kriteria5.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria5.setName("Kriteria5"); // NOI18N
@@ -794,12 +757,12 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria5);
-        Kriteria5.setBounds(330, 140, 90, 23);
+        Kriteria5.setBounds(292, 140, 90, 23);
 
         jLabel64.setText("Kesadaran Dengan GCS >= 7 :");
         jLabel64.setName("jLabel64"); // NOI18N
         FormInput.add(jLabel64);
-        jLabel64.setBounds(590, 110, 200, 23);
+        jLabel64.setBounds(546, 110, 160, 23);
 
         Kriteria9.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria9.setName("Kriteria9"); // NOI18N
@@ -809,7 +772,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria9);
-        Kriteria9.setBounds(800, 170, 80, 23);
+        Kriteria9.setBounds(710, 170, 80, 23);
 
         Kriteria10.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria10.setName("Kriteria10"); // NOI18N
@@ -819,7 +782,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria10);
-        Kriteria10.setBounds(150, 200, 80, 23);
+        Kriteria10.setBounds(139, 200, 80, 23);
 
         Kriteria7.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria7.setName("Kriteria7"); // NOI18N
@@ -829,7 +792,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria7);
-        Kriteria7.setBounds(800, 140, 80, 23);
+        Kriteria7.setBounds(710, 140, 80, 23);
 
         jLabel70.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel70.setText("Temperature 35 - 38°C");
@@ -840,12 +803,12 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
         jLabel69.setText("RR 12 - 20x/menit :");
         jLabel69.setName("jLabel69"); // NOI18N
         FormInput.add(jLabel69);
-        jLabel69.setBounds(680, 140, 110, 23);
+        jLabel69.setBounds(596, 140, 110, 23);
 
         jLabel71.setText("Perdarahan Saluran Pencernaan Teratasi :");
         jLabel71.setName("jLabel71"); // NOI18N
         FormInput.add(jLabel71);
-        jLabel71.setBounds(570, 170, 220, 23);
+        jLabel71.setBounds(486, 170, 220, 23);
 
         Kriteria11.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria11.setName("Kriteria11"); // NOI18N
@@ -861,7 +824,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
         jLabel72.setText("Gangguan Elektrolit (Na, Ca, CI, Mg, Cal) & Asam Basa Normal");
         jLabel72.setName("jLabel72"); // NOI18N
         FormInput.add(jLabel72);
-        jLabel72.setBounds(15, 170, 331, 23);
+        jLabel72.setBounds(15, 170, 320, 23);
 
         Kriteria8.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kriteria8.setName("Kriteria8"); // NOI18N
@@ -871,32 +834,32 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kriteria8);
-        Kriteria8.setBounds(360, 170, 80, 23);
+        Kriteria8.setBounds(328, 170, 80, 23);
 
         jLabel73.setText(":");
         jLabel73.setName("jLabel73"); // NOI18N
         FormInput.add(jLabel73);
-        jLabel73.setBounds(30, 80, 332, 23);
+        jLabel73.setBounds(0, 80, 332, 23);
 
         jLabel74.setText(":");
         jLabel74.setName("jLabel74"); // NOI18N
         FormInput.add(jLabel74);
-        jLabel74.setBounds(30, 110, 368, 23);
+        jLabel74.setBounds(0, 110, 368, 23);
 
         jLabel75.setText(":");
         jLabel75.setName("jLabel75"); // NOI18N
         FormInput.add(jLabel75);
-        jLabel75.setBounds(30, 140, 288, 23);
+        jLabel75.setBounds(0, 140, 288, 23);
 
         jLabel76.setText(":");
         jLabel76.setName("jLabel76"); // NOI18N
         FormInput.add(jLabel76);
-        jLabel76.setBounds(10, 200, 135, 23);
+        jLabel76.setBounds(0, 200, 135, 23);
 
         jLabel77.setText(":");
         jLabel77.setName("jLabel77"); // NOI18N
         FormInput.add(jLabel77);
-        jLabel77.setBounds(30, 170, 324, 23);
+        jLabel77.setBounds(0, 170, 324, 23);
 
         scrollInput.setViewportView(FormInput);
 
@@ -1024,7 +987,6 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
 }//GEN-LAST:event_BtnEditKeyPressed
 
     private void BtnKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnKeluarActionPerformed
-        pegawai.dispose();
         dispose();
 }//GEN-LAST:event_BtnKeluarActionPerformed
 
@@ -1160,7 +1122,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
 }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -1173,12 +1135,12 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
 
     private void BtnAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAllActionPerformed
         TCari.setText("");
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
-            tampil();
+            runBackground(() ->tampil());
             TCari.setText("");
         }else{
             Valid.pindah(evt, BtnCari, TPasien);
@@ -1244,6 +1206,30 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
     }//GEN-LAST:event_TanggalKeyPressed
 
     private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPetugasActionPerformed
+        DlgCariPegawai pegawai=new DlgCariPegawai(null,false);
+        pegawai.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(pegawai.getTable().getSelectedRow()!= -1){  
+                    KodePetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),0).toString());
+                    NamaPetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),1).toString());
+                    btnPetugas.requestFocus();
+                }  
+                    
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        }); 
         pegawai.emptTeks();
         pegawai.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         pegawai.setLocationRelativeTo(internalFrame1);
@@ -1301,6 +1287,31 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
     private void Kriteria8KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_Kriteria8KeyPressed
         Valid.pindah(evt,Kriteria7,Kriteria9);
     }//GEN-LAST:event_Kriteria8KeyPressed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        if(koneksiDB.CARICEPAT().equals("aktif")){
+            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+            });
+        }
+    }//GEN-LAST:event_formWindowOpened
 
     /**
     * @param args the command line arguments
@@ -1568,7 +1579,7 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
         if(akses.getjml2()>=1){
             btnPetugas.setEnabled(false);
             KodePetugas.setText(akses.getkode());
-            NamaPetugas.setText(pegawai.tampil3(akses.getkode()));
+            NamaPetugas.setText(Sequel.CariPegawai(akses.getkode()));
         } 
         
         if(TANGGALMUNDUR.equals("no")){
@@ -1640,5 +1651,37 @@ public final class RMChecklistKriteriaKeluarHCU extends javax.swing.JDialog {
             LCount.setText(""+tabMode.getRowCount());
             emptTeks();
         }
+    }
+    
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        if (executor.isShutdown() || executor.isTerminated()) return;
+        if (!isDisplayable()) return;
+
+        ceksukses = true;
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        try {
+            executor.submit(() -> {
+                try {
+                    task.run();
+                } finally {
+                    ceksukses = false;
+                    SwingUtilities.invokeLater(() -> {
+                        if (isDisplayable()) {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    });
+                }
+            });
+        } catch (RejectedExecutionException ex) {
+            ceksukses = false;
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        executor.shutdownNow();
+        super.dispose();
     }
 }

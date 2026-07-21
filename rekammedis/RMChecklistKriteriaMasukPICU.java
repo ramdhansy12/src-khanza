@@ -27,8 +27,12 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -47,10 +51,11 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
     private Connection koneksi=koneksiDB.condb();
     private sekuel Sequel=new sekuel();
     private validasi Valid=new validasi();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private volatile boolean ceksukses = false;
     private PreparedStatement ps;
     private ResultSet rs;
     private int i=0;    
-    private DlgCariPegawai pegawai=new DlgCariPegawai(null,false);
     private String TANGGALMUNDUR="yes";
     /** Creates new form DlgRujuk
      * @param parent
@@ -105,54 +110,6 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         TNoRw.setDocument(new batasInput((byte)17).getKata(TNoRw));
         TCari.setDocument(new batasInput((int)100).getKata(TCari));
         Keterangan.setDocument(new batasInput((int)50).getKata(Keterangan));
-        
-        
-        if(koneksiDB.CARICEPAT().equals("aktif")){
-            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    if(TCari.getText().length()>2){
-                        tampil();
-                    }
-                }
-            });
-        }
-        
-        pegawai.addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {}
-            @Override
-            public void windowClosing(WindowEvent e) {}
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if(pegawai.getTable().getSelectedRow()!= -1){  
-                    KodePetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),0).toString());
-                    NamaPetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),1).toString());
-                    btnPetugas.requestFocus();
-                }  
-                    
-            }
-            @Override
-            public void windowIconified(WindowEvent e) {}
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-            @Override
-            public void windowActivated(WindowEvent e) {}
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        }); 
         
         ChkInput.setSelected(false);
         isForm();
@@ -338,6 +295,11 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         internalFrame1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 245, 235)), "::[ Data Check List Kriteria Masuk PICU ]::", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), new java.awt.Color(50, 50, 50))); // NOI18N
         internalFrame1.setFont(new java.awt.Font("Tahoma", 2, 12)); // NOI18N
@@ -505,7 +467,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         panelGlass9.add(jLabel19);
 
         DTPCari1.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-01-2026" }));
+        DTPCari1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026" }));
         DTPCari1.setDisplayFormat("dd-MM-yyyy");
         DTPCari1.setName("DTPCari1"); // NOI18N
         DTPCari1.setOpaque(false);
@@ -519,7 +481,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         panelGlass9.add(jLabel21);
 
         DTPCari2.setForeground(new java.awt.Color(50, 70, 50));
-        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-01-2026" }));
+        DTPCari2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026" }));
         DTPCari2.setDisplayFormat("dd-MM-yyyy");
         DTPCari2.setName("DTPCari2"); // NOI18N
         DTPCari2.setOpaque(false);
@@ -669,7 +631,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         TglLahir.setBounds(689, 10, 100, 23);
 
         Tanggal.setForeground(new java.awt.Color(50, 70, 50));
-        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-01-2026 10:43:28" }));
+        Tanggal.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "06-02-2026 13:46:55" }));
         Tanggal.setDisplayFormat("dd-MM-yyyy HH:mm:ss");
         Tanggal.setName("Tanggal"); // NOI18N
         Tanggal.setOpaque(false);
@@ -681,21 +643,21 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         FormInput.add(Tanggal);
         Tanggal.setBounds(79, 40, 130, 23);
 
-        jLabel23.setText("DPJP / Dokter Jaga / Dokter Anastesi / PICU / HCU/ ICU /IGD :");
+        jLabel23.setText("DPJP / Dokter Jaga / IGD :");
         jLabel23.setName("jLabel23"); // NOI18N
         FormInput.add(jLabel23);
-        jLabel23.setBounds(210, 40, 350, 23);
+        jLabel23.setBounds(221, 40, 160, 23);
 
         KodePetugas.setEditable(false);
         KodePetugas.setHighlighter(null);
         KodePetugas.setName("KodePetugas"); // NOI18N
         FormInput.add(KodePetugas);
-        KodePetugas.setBounds(570, 40, 127, 23);
+        KodePetugas.setBounds(385, 40, 127, 23);
 
         NamaPetugas.setEditable(false);
         NamaPetugas.setName("NamaPetugas"); // NOI18N
         FormInput.add(NamaPetugas);
-        NamaPetugas.setBounds(700, 40, 245, 23);
+        NamaPetugas.setBounds(514, 40, 245, 23);
 
         btnPetugas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
         btnPetugas.setMnemonic('2');
@@ -712,7 +674,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(btnPetugas);
-        btnPetugas.setBounds(950, 40, 28, 23);
+        btnPetugas.setBounds(761, 40, 28, 23);
 
         jLabel5.setText(":");
         jLabel5.setName("jLabel5"); // NOI18N
@@ -758,29 +720,24 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel64.setText(":");
         jLabel64.setName("jLabel64"); // NOI18N
         FormInput.add(jLabel64);
-        jLabel64.setBounds(60, 90, 310, 23);
+        jLabel64.setBounds(0, 90, 361, 23);
 
         jLabel65.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel65.setText("Membutuhkan Monitoring & Terapi Intensif Secara Berkelanjutan");
         jLabel65.setName("jLabel65"); // NOI18N
         FormInput.add(jLabel65);
-        jLabel65.setBounds(20, 90, 341, 23);
+        jLabel65.setBounds(40, 90, 341, 23);
 
         KriteriaUmum1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         KriteriaUmum1.setSelectedIndex(1);
         KriteriaUmum1.setName("KriteriaUmum1"); // NOI18N
-        KriteriaUmum1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                KriteriaUmum1ActionPerformed(evt);
-            }
-        });
         KriteriaUmum1.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 KriteriaUmum1KeyPressed(evt);
             }
         });
         FormInput.add(KriteriaUmum1);
-        KriteriaUmum1.setBounds(380, 90, 80, 23);
+        KriteriaUmum1.setBounds(365, 90, 80, 23);
 
         jSeparator13.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator13.setForeground(new java.awt.Color(239, 244, 234));
@@ -842,28 +799,23 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel66.setText("Pasien Dengan Kondisi Mengancam Jiwa Yang Masih Berpotensi Reversibel");
         jLabel66.setName("jLabel66"); // NOI18N
         FormInput.add(jLabel66);
-        jLabel66.setBounds(20, 120, 400, 23);
+        jLabel66.setBounds(40, 120, 380, 23);
 
         jLabel67.setText(":");
         jLabel67.setName("jLabel67"); // NOI18N
         FormInput.add(jLabel67);
-        jLabel67.setBounds(10, 120, 409, 23);
+        jLabel67.setBounds(0, 120, 409, 23);
 
         KriteriaUmum3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         KriteriaUmum3.setSelectedIndex(1);
         KriteriaUmum3.setName("KriteriaUmum3"); // NOI18N
-        KriteriaUmum3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                KriteriaUmum3ActionPerformed(evt);
-            }
-        });
         KriteriaUmum3.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 KriteriaUmum3KeyPressed(evt);
             }
         });
         FormInput.add(KriteriaUmum3);
-        KriteriaUmum3.setBounds(430, 120, 80, 23);
+        KriteriaUmum3.setBounds(413, 120, 80, 23);
 
         jSeparator3.setBackground(new java.awt.Color(239, 244, 234));
         jSeparator3.setForeground(new java.awt.Color(239, 244, 234));
@@ -895,12 +847,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel69.setText("Gagal Napas Akut (Misal: ARDS, Status Asmatik)");
         jLabel69.setName("jLabel69"); // NOI18N
         FormInput.add(jLabel69);
-        jLabel69.setBounds(60, 190, 270, 23);
+        jLabel69.setBounds(60, 190, 250, 23);
 
         jLabel70.setText(":");
         jLabel70.setName("jLabel70"); // NOI18N
         FormInput.add(jLabel70);
-        jLabel70.setBounds(20, 190, 302, 23);
+        jLabel70.setBounds(0, 190, 302, 23);
 
         Respirasi1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Respirasi1.setSelectedIndex(1);
@@ -911,7 +863,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Respirasi1);
-        Respirasi1.setBounds(330, 190, 80, 23);
+        Respirasi1.setBounds(306, 190, 80, 23);
 
         Respirasi2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Respirasi2.setSelectedIndex(1);
@@ -922,12 +874,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Respirasi2);
-        Respirasi2.setBounds(760, 190, 80, 23);
+        Respirasi2.setBounds(709, 190, 80, 23);
 
         jLabel62.setText("Hipoksemia Berat (PaO₂ < 60 mmHg Dengan FiO₂ > 0,6) :");
         jLabel62.setName("jLabel62"); // NOI18N
         FormInput.add(jLabel62);
-        jLabel62.setBounds(430, 190, 320, 23);
+        jLabel62.setBounds(385, 190, 320, 23);
 
         jLabel71.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel71.setText("Butuh Ventilasi Mekanik Invasif/Non-invasif");
@@ -938,7 +890,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel72.setText(":");
         jLabel72.setName("jLabel72"); // NOI18N
         FormInput.add(jLabel72);
-        jLabel72.setBounds(20, 220, 278, 23);
+        jLabel72.setBounds(0, 220, 278, 23);
 
         Respirasi3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Respirasi3.setSelectedIndex(1);
@@ -949,7 +901,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Respirasi3);
-        Respirasi3.setBounds(300, 220, 80, 23);
+        Respirasi3.setBounds(282, 220, 80, 23);
 
         Respirasi4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Respirasi4.setSelectedIndex(1);
@@ -960,12 +912,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Respirasi4);
-        Respirasi4.setBounds(760, 220, 80, 23);
+        Respirasi4.setBounds(709, 220, 80, 23);
 
         jLabel63.setText("Hiperkarbia Berat (PaCO₂ > 60 mmHg Dengan pH < 7,25) :");
         jLabel63.setName("jLabel63"); // NOI18N
         FormInput.add(jLabel63);
-        jLabel63.setBounds(430, 220, 320, 23);
+        jLabel63.setBounds(385, 220, 320, 23);
 
         jLabel73.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel73.setText("2. Kardiovaskular");
@@ -977,12 +929,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel74.setText("Syok Refrakter (Septik, Kardiogenik, Hipovolemik, Anafilaksis)");
         jLabel74.setName("jLabel74"); // NOI18N
         FormInput.add(jLabel74);
-        jLabel74.setBounds(60, 270, 320, 23);
+        jLabel74.setBounds(60, 270, 310, 23);
 
         jLabel75.setText(":");
         jLabel75.setName("jLabel75"); // NOI18N
         FormInput.add(jLabel75);
-        jLabel75.setBounds(20, 270, 366, 23);
+        jLabel75.setBounds(0, 270, 366, 23);
 
         Kardiovaskuler1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kardiovaskuler1.setSelectedIndex(1);
@@ -993,7 +945,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kardiovaskuler1);
-        Kardiovaskuler1.setBounds(390, 270, 80, 23);
+        Kardiovaskuler1.setBounds(370, 270, 80, 23);
 
         Kardiovaskuler2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kardiovaskuler2.setSelectedIndex(1);
@@ -1004,12 +956,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kardiovaskuler2);
-        Kardiovaskuler2.setBounds(760, 270, 80, 23);
+        Kardiovaskuler2.setBounds(709, 270, 80, 23);
 
         jLabel76.setText("Gagal Jantung Berat :");
         jLabel76.setName("jLabel76"); // NOI18N
         FormInput.add(jLabel76);
-        jLabel76.setBounds(620, 270, 130, 23);
+        jLabel76.setBounds(575, 270, 130, 23);
 
         jLabel77.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel77.setText("Gangguan Irama Jantung Yang Mengancam Nyawa");
@@ -1020,7 +972,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel78.setText(":");
         jLabel78.setName("jLabel78"); // NOI18N
         FormInput.add(jLabel78);
-        jLabel78.setBounds(30, 300, 312, 23);
+        jLabel78.setBounds(0, 300, 312, 23);
 
         Kardiovaskuler3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kardiovaskuler3.setSelectedIndex(1);
@@ -1031,7 +983,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kardiovaskuler3);
-        Kardiovaskuler3.setBounds(350, 300, 80, 23);
+        Kardiovaskuler3.setBounds(316, 300, 80, 23);
 
         Kardiovaskuler4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Kardiovaskuler4.setSelectedIndex(1);
@@ -1042,12 +994,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Kardiovaskuler4);
-        Kardiovaskuler4.setBounds(760, 300, 80, 23);
+        Kardiovaskuler4.setBounds(709, 300, 80, 23);
 
         jLabel79.setText("Pasca Resusitasi Jantung Paru :");
         jLabel79.setName("jLabel79"); // NOI18N
         FormInput.add(jLabel79);
-        jLabel79.setBounds(570, 300, 180, 23);
+        jLabel79.setBounds(525, 300, 180, 23);
 
         jLabel80.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel80.setText("3. Neurologis");
@@ -1059,12 +1011,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel81.setText("Trauma Kepala Berat Dengan Gangguan Hemodinamik/Napas");
         jLabel81.setName("jLabel81"); // NOI18N
         FormInput.add(jLabel81);
-        jLabel81.setBounds(60, 350, 330, 23);
+        jLabel81.setBounds(60, 350, 310, 23);
 
         jLabel82.setText(":");
         jLabel82.setName("jLabel82"); // NOI18N
         FormInput.add(jLabel82);
-        jLabel82.setBounds(30, 350, 364, 23);
+        jLabel82.setBounds(0, 350, 364, 23);
 
         Neurologis1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Neurologis1.setSelectedIndex(1);
@@ -1075,7 +1027,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Neurologis1);
-        Neurologis1.setBounds(400, 350, 80, 23);
+        Neurologis1.setBounds(368, 350, 80, 23);
 
         Neurologis2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Neurologis2.setSelectedIndex(1);
@@ -1086,12 +1038,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Neurologis2);
-        Neurologis2.setBounds(760, 350, 80, 23);
+        Neurologis2.setBounds(709, 350, 80, 23);
 
         jLabel83.setText("Kejang Berulang / Status Epileptikus :");
         jLabel83.setName("jLabel83"); // NOI18N
         FormInput.add(jLabel83);
-        jLabel83.setBounds(550, 350, 200, 23);
+        jLabel83.setBounds(505, 350, 200, 23);
 
         jLabel84.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel84.setText("Penurunan Kesadaran (GCS ≤ 8 Atau Koma)");
@@ -1102,7 +1054,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel85.setText(":");
         jLabel85.setName("jLabel85"); // NOI18N
         FormInput.add(jLabel85);
-        jLabel85.setBounds(30, 380, 280, 23);
+        jLabel85.setBounds(0, 380, 280, 23);
 
         Neurologis3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Neurologis3.setSelectedIndex(1);
@@ -1113,7 +1065,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Neurologis3);
-        Neurologis3.setBounds(320, 380, 80, 23);
+        Neurologis3.setBounds(284, 380, 80, 23);
 
         Neurologis4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Neurologis4.setSelectedIndex(1);
@@ -1124,12 +1076,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Neurologis4);
-        Neurologis4.setBounds(760, 380, 80, 23);
+        Neurologis4.setBounds(709, 380, 80, 23);
 
         jLabel86.setText("Edema Serebri, Perdarahan Intrakranial :");
         jLabel86.setName("jLabel86"); // NOI18N
         FormInput.add(jLabel86);
-        jLabel86.setBounds(520, 380, 230, 23);
+        jLabel86.setBounds(475, 380, 230, 23);
 
         jLabel87.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel87.setText("4. Bedah / Pasca Operasi");
@@ -1141,12 +1093,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel88.setText("Pasca Operasi Mayor Dengan Risiko Komplikasi Tinggi");
         jLabel88.setName("jLabel88"); // NOI18N
         FormInput.add(jLabel88);
-        jLabel88.setBounds(60, 430, 280, 23);
+        jLabel88.setBounds(60, 430, 270, 23);
 
         jLabel89.setText(":");
         jLabel89.setName("jLabel89"); // NOI18N
         FormInput.add(jLabel89);
-        jLabel89.setBounds(20, 430, 328, 23);
+        jLabel89.setBounds(0, 430, 328, 23);
 
         Bedah1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Bedah1.setSelectedIndex(1);
@@ -1157,7 +1109,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Bedah1);
-        Bedah1.setBounds(350, 430, 80, 23);
+        Bedah1.setBounds(332, 430, 80, 23);
 
         Bedah2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Bedah2.setSelectedIndex(1);
@@ -1168,12 +1120,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Bedah2);
-        Bedah2.setBounds(760, 430, 80, 23);
+        Bedah2.setBounds(709, 430, 80, 23);
 
         jLabel90.setText("Pasca Transplantasi Organ :");
         jLabel90.setName("jLabel90"); // NOI18N
         FormInput.add(jLabel90);
-        jLabel90.setBounds(550, 430, 200, 23);
+        jLabel90.setBounds(505, 430, 200, 23);
 
         jLabel93.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel93.setText("Pasca Operasi Jantung / Thoraks Kompleks");
@@ -1184,7 +1136,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel94.setText(":");
         jLabel94.setName("jLabel94"); // NOI18N
         FormInput.add(jLabel94);
-        jLabel94.setBounds(30, 460, 275, 23);
+        jLabel94.setBounds(0, 460, 275, 23);
 
         Bedah3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Bedah3.setSelectedIndex(1);
@@ -1195,7 +1147,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Bedah3);
-        Bedah3.setBounds(310, 460, 80, 23);
+        Bedah3.setBounds(279, 460, 80, 23);
 
         jLabel95.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel95.setText("5. Lain-lain");
@@ -1207,12 +1159,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         jLabel96.setText("Gangguan Metabolik / Elektrolit Yang Mengancam Jiwa");
         jLabel96.setName("jLabel96"); // NOI18N
         FormInput.add(jLabel96);
-        jLabel96.setBounds(60, 510, 300, 23);
+        jLabel96.setBounds(60, 510, 280, 23);
 
         jLabel97.setText(":");
         jLabel97.setName("jLabel97"); // NOI18N
         FormInput.add(jLabel97);
-        jLabel97.setBounds(20, 510, 332, 23);
+        jLabel97.setBounds(0, 510, 332, 23);
 
         Lainlain1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Lainlain1.setSelectedIndex(1);
@@ -1223,7 +1175,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Lainlain1);
-        Lainlain1.setBounds(370, 510, 80, 23);
+        Lainlain1.setBounds(336, 510, 80, 23);
 
         Lainlain2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Lainlain2.setSelectedIndex(1);
@@ -1234,17 +1186,17 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Lainlain2);
-        Lainlain2.setBounds(760, 510, 80, 23);
+        Lainlain2.setBounds(709, 510, 80, 23);
 
         jLabel98.setText("Intoksikasi Berat :");
         jLabel98.setName("jLabel98"); // NOI18N
         FormInput.add(jLabel98);
-        jLabel98.setBounds(550, 510, 200, 23);
+        jLabel98.setBounds(505, 510, 200, 23);
 
         jLabel100.setText(":");
         jLabel100.setName("jLabel100"); // NOI18N
         FormInput.add(jLabel100);
-        jLabel100.setBounds(20, 540, 289, 23);
+        jLabel100.setBounds(0, 540, 289, 23);
 
         Lainlain3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ya", "Tidak" }));
         Lainlain3.setSelectedIndex(1);
@@ -1255,7 +1207,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             }
         });
         FormInput.add(Lainlain3);
-        Lainlain3.setBounds(320, 540, 80, 23);
+        Lainlain3.setBounds(293, 540, 80, 23);
 
         jLabel99.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel99.setText("Sepsis Berat Dengan Disfungsi Organ Multipel");
@@ -1389,7 +1341,6 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
 }//GEN-LAST:event_BtnEditKeyPressed
 
     private void BtnKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnKeluarActionPerformed
-        pegawai.dispose();
         dispose();
 }//GEN-LAST:event_BtnKeluarActionPerformed
 
@@ -1547,7 +1498,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
 }//GEN-LAST:event_TCariKeyPressed
 
     private void BtnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCariActionPerformed
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnCariActionPerformed
 
     private void BtnCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCariKeyPressed
@@ -1560,12 +1511,12 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
 
     private void BtnAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAllActionPerformed
         TCari.setText("");
-        tampil();
+        runBackground(() ->tampil());
 }//GEN-LAST:event_BtnAllActionPerformed
 
     private void BtnAllKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnAllKeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
-            tampil();
+            runBackground(() ->tampil());
             TCari.setText("");
         }else{
             Valid.pindah(evt, BtnCari, TPasien);
@@ -1634,6 +1585,30 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
     }//GEN-LAST:event_TanggalKeyPressed
 
     private void btnPetugasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPetugasActionPerformed
+        DlgCariPegawai pegawai=new DlgCariPegawai(null,false);
+        pegawai.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(pegawai.getTable().getSelectedRow()!= -1){  
+                    KodePetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),0).toString());
+                    NamaPetugas.setText(pegawai.getTable().getValueAt(pegawai.getTable().getSelectedRow(),1).toString());
+                    btnPetugas.requestFocus();
+                }  
+                    
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        }); 
         pegawai.emptTeks();
         pegawai.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
         pegawai.setLocationRelativeTo(internalFrame1);
@@ -1736,13 +1711,30 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         Valid.pindah(evt,KriteriaUmum2,Respirasi2);
     }//GEN-LAST:event_Respirasi1KeyPressed
 
-    private void KriteriaUmum1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_KriteriaUmum1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_KriteriaUmum1ActionPerformed
-
-    private void KriteriaUmum3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_KriteriaUmum3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_KriteriaUmum3ActionPerformed
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        if(koneksiDB.CARICEPAT().equals("aktif")){
+            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    if(TCari.getText().length()>2){
+                        runBackground(() ->tampil());
+                    }
+                }
+            });
+        }
+    }//GEN-LAST:event_formWindowOpened
 
     /**
     * @param args the command line arguments
@@ -2082,7 +2074,7 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
         if(akses.getjml2()>=1){
             btnPetugas.setEnabled(false);
             KodePetugas.setText(akses.getkode());
-            NamaPetugas.setText(pegawai.tampil3(akses.getkode()));
+            NamaPetugas.setText(Sequel.CariPegawai(akses.getkode()));
         }
         if(TANGGALMUNDUR.equals("no")){
             if(!akses.getkode().equals("Admin Utama")){
@@ -2174,5 +2166,37 @@ public final class RMChecklistKriteriaMasukPICU extends javax.swing.JDialog {
             LCount.setText(""+tabMode.getRowCount());
             emptTeks();
         }
+    }
+    
+    private void runBackground(Runnable task) {
+        if (ceksukses) return;
+        if (executor.isShutdown() || executor.isTerminated()) return;
+        if (!isDisplayable()) return;
+
+        ceksukses = true;
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        try {
+            executor.submit(() -> {
+                try {
+                    task.run();
+                } finally {
+                    ceksukses = false;
+                    SwingUtilities.invokeLater(() -> {
+                        if (isDisplayable()) {
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    });
+                }
+            });
+        } catch (RejectedExecutionException ex) {
+            ceksukses = false;
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        executor.shutdownNow();
+        super.dispose();
     }
 }

@@ -1864,719 +1864,161 @@ private void BtnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         
     }
     
-//    private void tampilSysmex(String order) { 
-//        try {
-//            koneksisysmex=koneksiDBSysmex.condb();
-//            Valid.tabelKosong(tabMode);
-//            
-//            for(i2=0;i2<tbTarif.getRowCount();i2++){ 
-//                if(tbTarif.getValueAt(i2,0).toString().equals("true")){
-//                    System.out.println("Pemeriksaan Laborat : "+tbTarif.getValueAt(i2,1).toString()+" "+tbTarif.getValueAt(i2,2).toString());
-//                    tabMode.addRow(new Object[]{true,tbTarif.getValueAt(i2,2).toString(),"","","","","",0,0,0,0,0,0,0,0,""});
-////                    pstampil=koneksi.prepareStatement(
-////                            "select template_laboratorium.id_template, template_laboratorium.Pemeriksaan, "+
-////                            "template_laboratorium.satuan, template_laboratorium.nilai_rujukan_ld,"+
-////                            "template_laboratorium.biaya_item,template_laboratorium.bagian_rs,"+
-////                            "template_laboratorium.bhp,template_laboratorium.bagian_perujuk,"+
-////                            "template_laboratorium.bagian_dokter,template_laboratorium.bagian_laborat,"+
-////                            "template_laboratorium.kso,template_laboratorium.menejemen "+
-////                            "from template_laboratorium inner join permintaan_detail_permintaan_lab on "+
-////                            "permintaan_detail_permintaan_lab.id_template=template_laboratorium.id_template "+
-////                            "where template_laboratorium.kd_jenis_prw=? and permintaan_detail_permintaan_lab.noorder=? "+
-////                            (TCari.getText().trim().equals("")?"":"and template_laboratorium.Pemeriksaan like ? ")+
-////                            "order by urut");
-//                    // Query ke DB RS — tambahkan ambil sysmex_order_testid
-//                pstampil = koneksi.prepareStatement(
-//                    "select template_laboratorium.id_template, template_laboratorium.Pemeriksaan, " +
-//                    "template_laboratorium.satuan, template_laboratorium.nilai_rujukan_ld, " +
-//                    "template_laboratorium.biaya_item, template_laboratorium.bagian_rs, " +
-//                    "template_laboratorium.bhp, template_laboratorium.bagian_perujuk, " +
-//                    "template_laboratorium.bagian_dokter, template_laboratorium.bagian_laborat, " +
-//                    "template_laboratorium.kso, template_laboratorium.menejemen, " +
-//                    "jns_perawatan_lab.sysmex_order_testid " +  // ← TAMBAH INI
-//                    "from template_laboratorium " +
-//                    "inner join permintaan_detail_permintaan_lab on " +
-//                    "permintaan_detail_permintaan_lab.id_template=template_laboratorium.id_template " +
-//                    "inner join jns_perawatan_lab on " +  // ← TAMBAH JOIN
-//                    "jns_perawatan_lab.kd_jenis_prw=template_laboratorium.kd_jenis_prw " +
-//                    "where template_laboratorium.kd_jenis_prw=? " +
-//                    "and permintaan_detail_permintaan_lab.noorder=? " +
-//                    (TCari.getText().trim().equals("") ? "" : "and template_laboratorium.Pemeriksaan like ? ") +
-//                    "order by urut");
-//
-//                    try {
-//                        pstampil.setString(1,tbTarif.getValueAt(i2,1).toString());
-//                        pstampil.setString(2,order);
-//                        if(!TCari.getText().trim().equals("")){
-//                            pstampil.setString(3,"%"+TCari.getText().trim()+"%");
-//                        }
-//                        rstampil=pstampil.executeQuery();
-//                        while(rstampil.next()){
-//                            System.out.println("ID Detail Laborat RS : "+rstampil.getString("id_template")+" "+rstampil.getString("Pemeriksaan"));
-//                           // pstindakan=koneksisysmex.prepareStatement("select RESDT.ORDER_TESTID,RESDT.DATA_TYP,RESDT.RESULT_VALUE,RESDT.RESULT_FT,RESDT.UNIT,RESDT.FLAG,RESDT.REF_RANGE from RESDT where RESDT.ONO=? and RESDT.TEST_NM=?");
-////                           pstindakan = koneksisysmex.prepareStatement(
-////                                        "select RESDT.ORDER_TESTID,RESDT.DATA_TYP,RESDT.RESULT_VALUE," +
-////                                        "RESDT.RESULT_FT,RESDT.UNIT,RESDT.FLAG,RESDT.REF_RANGE " +
-////                                        "from RESDT where RESDT.ONO=? and RESDT.TEST_NM=? and RESDT.ORDER_TESTID=?");
-//// Query ke Sysmex — tambahkan filter ORDER_TESTID
-//                        pstindakan = koneksisysmex.prepareStatement(
-//                            "select RESDT.ORDER_TESTID, RESDT.DATA_TYP, RESDT.RESULT_VALUE, " +
-//                            "RESDT.RESULT_FT, RESDT.UNIT, RESDT.FLAG, RESDT.REF_RANGE " +
-//                            "from RESDT " +
-//                            "where RESDT.ONO=? AND RESDT.TEST_NM=? AND RESDT.ORDER_TESTID=?"); // ← TAMBAH 
-//                           try {
-//                        pstindakan.setString(1, order);
-//                        pstindakan.setString(2, rstampil.getString("Pemeriksaan"));
-//                        pstindakan.setString(3, rstampil.getString("sysmex_order_testid")); // ← TAMBAH INI
-//
-//                                rstindakan=pstindakan.executeQuery();
-//                                System.out.println("Menjalankan Query : select RESDT.ORDER_TESTID,RESDT.DATA_TYP,RESDT.RESULT_VALUE,RESDT.RESULT_FT,RESDT.UNIT,RESDT.FLAG,RESDT.REF_RANGE from RESDT where RESDT.ONO='"+order+"' and RESDT.TEST_NM='"+rstampil.getString("Pemeriksaan")+"'");
-//                                if(rstindakan.next()){
-//                                    System.out.println("ID Detail Laborat Sysmex Yang Ditemukan : "+rstindakan.getString("ORDER_TESTID"));
-//                                    if(rstindakan.getString("DATA_TYP").equals("FT")){
-//                                        tabMode.addRow(new Object[]{
-//                                            true,"   "+rstampil.getString("Pemeriksaan"),rstindakan.getString("RESULT_FT"),rstindakan.getString("UNIT"),
-//                                            rstindakan.getString("REF_RANGE"),rstindakan.getString("FLAG").replaceAll("LL","L").replaceAll("HH","H"),
-//                                            rstampil.getString("id_template"),rstampil.getDouble("biaya_item"),rstampil.getDouble("bagian_rs"),
-//                                            rstampil.getDouble("bhp"),rstampil.getDouble("bagian_perujuk"),rstampil.getDouble("bagian_dokter"),
-//                                            rstampil.getDouble("bagian_laborat"),rstampil.getDouble("kso"),rstampil.getDouble("menejemen"),
-//                                            tbTarif.getValueAt(i2,1).toString()
-//                                        });
-//                                    }else{
-//                                        tabMode.addRow(new Object[]{
-//                                            true,"   "+rstampil.getString("Pemeriksaan"),rstindakan.getString("RESULT_VALUE"),rstindakan.getString("UNIT"),
-//                                            rstindakan.getString("REF_RANGE"),rstindakan.getString("FLAG").replaceAll("LL","L").replaceAll("HH","H"),
-//                                            rstampil.getString("id_template"),rstampil.getDouble("biaya_item"),rstampil.getDouble("bagian_rs"),
-//                                            rstampil.getDouble("bhp"),rstampil.getDouble("bagian_perujuk"),rstampil.getDouble("bagian_dokter"),
-//                                            rstampil.getDouble("bagian_laborat"),rstampil.getDouble("kso"),rstampil.getDouble("menejemen"),
-//                                            tbTarif.getValueAt(i2,1).toString()
-//                                        });
-//                                    }   
-//                                }
-//                            } catch (Exception e) {
-//                                System.out.println("Notif : "+e);
-//                            } finally{
-//                                if(rstindakan!=null){
-//                                    rstindakan.close();
-//                                }
-//                                if(pstindakan!=null){
-//                                    pstindakan.close();
-//                                }
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        System.out.println("Notifikasi : "+e);
-//                    } finally{
-//                        if(rstampil!=null){
-//                            rstampil.close();
-//                        }
-//                        if(pstampil!=null){
-//                            pstampil.close();
-//                        }
-//                    }                      
-//                }
-//            }
-//        } catch (Exception e) {
-//            System.out.println("Error Detail : "+e);
-//        }
-//        
-//    }
-//  
-
-//private void tampilSysmex(String order) { 
-//    try {
-//        koneksisysmex = koneksiDBSysmex.condb();
-//        Valid.tabelKosong(tabMode);
-//        
-//        for (i2 = 0; i2 < tbTarif.getRowCount(); i2++) { 
-//            if (tbTarif.getValueAt(i2, 0).toString().equals("true")) {
-//                System.out.println("Pemeriksaan Laborat : " + tbTarif.getValueAt(i2, 1).toString() + " " + tbTarif.getValueAt(i2, 2).toString());
-//                tabMode.addRow(new Object[]{
-//                    true, tbTarif.getValueAt(i2, 2).toString(), 
-//                    "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, ""
-//                });
-//                
-//                pstampil = koneksi.prepareStatement(
-//                    "select template_laboratorium.id_template, template_laboratorium.Pemeriksaan, " +
-//                    "template_laboratorium.satuan, template_laboratorium.nilai_rujukan_ld, " +
-//                    "template_laboratorium.biaya_item, template_laboratorium.bagian_rs, " +
-//                    "template_laboratorium.bhp, template_laboratorium.bagian_perujuk, " +
-//                    "template_laboratorium.bagian_dokter, template_laboratorium.bagian_laborat, " +
-//                    "template_laboratorium.kso, template_laboratorium.menejemen " +
-//                    "from template_laboratorium inner join permintaan_detail_permintaan_lab on " +
-//                    "permintaan_detail_permintaan_lab.id_template=template_laboratorium.id_template " +
-//                    "where template_laboratorium.kd_jenis_prw=? and permintaan_detail_permintaan_lab.noorder=? " +
-//                    (TCari.getText().trim().equals("") ? "" : "and template_laboratorium.Pemeriksaan like ? ") +
-//                    "order by urut");
-//                try {
-//                    pstampil.setString(1, tbTarif.getValueAt(i2, 1).toString());
-//                    pstampil.setString(2, order);
-//                    if (!TCari.getText().trim().equals("")) {
-//                        pstampil.setString(3, "%" + TCari.getText().trim() + "%");
-//                    }
-//                    rstampil = pstampil.executeQuery();
-//                    while (rstampil.next()) {
-//                        System.out.println("ID Detail Laborat RS : " + rstampil.getString("id_template") + " " + rstampil.getString("Pemeriksaan"));
-//                        
-//                        // Cari item_parent dari tabel mapping berdasarkan id_template
-//                        String itemParent = "";
-//                        PreparedStatement psMapping = koneksisysmex.prepareStatement(
-//                            "select sysmex_item_parent from mapping_template_sysmex where id_template=?");
-//                        try {
-//                            psMapping.setString(1, rstampil.getString("id_template"));
-//                            ResultSet rsMapping = psMapping.executeQuery();
-//                            if (rsMapping.next()) {
-//                                itemParent = rsMapping.getString("sysmex_item_parent");
-//                            }
-//                            rsMapping.close();
-//                        } catch (Exception e) {
-//                            System.out.println("Mapping tidak ditemukan : " + e);
-//                        } finally {
-//                            psMapping.close();
-//                        }
-//                        
-//                        // Query ke Sysmex dengan atau tanpa filter ITEM_PARENT
-//                        String sqlSysmex;
-//                        if (!itemParent.equals("")) {
-//                            sqlSysmex = "select RESDT.ORDER_TESTID, RESDT.DATA_TYP, RESDT.RESULT_VALUE, " +
-//                                        "RESDT.RESULT_FT, RESDT.UNIT, RESDT.FLAG, RESDT.REF_RANGE " +
-//                                        "from RESDT where RESDT.ONO=? and RESDT.TEST_NM=? and RESDT.ITEM_PARENT=?";
-//                        } else {
-//                            sqlSysmex = "select RESDT.ORDER_TESTID, RESDT.DATA_TYP, RESDT.RESULT_VALUE, " +
-//                                        "RESDT.RESULT_FT, RESDT.UNIT, RESDT.FLAG, RESDT.REF_RANGE " +
-//                                        "from RESDT where RESDT.ONO=? and RESDT.TEST_NM=?";
-//                        }
-//                        
-//                        pstindakan = koneksisysmex.prepareStatement(sqlSysmex);
-//                        try {
-//                            pstindakan.setString(1, order);
-//                            pstindakan.setString(2, rstampil.getString("Pemeriksaan"));
-//                            if (!itemParent.equals("")) {
-//                                pstindakan.setString(3, itemParent);
-//                            }
-//                            
-//                            System.out.println("Menjalankan Query : " + sqlSysmex.replaceFirst("\\?", "'" + order + "'").replaceFirst("\\?", "'" + rstampil.getString("Pemeriksaan") + "'") + (!itemParent.equals("") ? " [ITEM_PARENT=" + itemParent + "]" : " [NO FILTER]"));
-//                            
-//                            rstindakan = pstindakan.executeQuery();
-//                            if (rstindakan.next()) {
-//                                System.out.println("ID Detail Laborat Sysmex Yang Ditemukan : " + rstindakan.getString("ORDER_TESTID"));
-//                                String flag = rstindakan.getString("FLAG");
-//                                if (flag != null) {
-//                                    flag = flag.replaceAll("LL", "L").replaceAll("HH", "H");
-//                                } else {
-//                                    flag = "";
-//                                }
-//                                
-//                                String hasil;
-//                                if (rstindakan.getString("DATA_TYP") != null && rstindakan.getString("DATA_TYP").equals("FT")) {
-//                                    hasil = rstindakan.getString("RESULT_FT");
-//                                } else {
-//                                    hasil = rstindakan.getString("RESULT_VALUE");
-//                                }
-//                                
-//                                tabMode.addRow(new Object[]{
-//                                    true, "   " + rstampil.getString("Pemeriksaan"),
-//                                    hasil,
-//                                    rstindakan.getString("UNIT"),
-//                                    rstindakan.getString("REF_RANGE"),
-//                                    flag,
-//                                    rstampil.getString("id_template"),
-//                                    rstampil.getDouble("biaya_item"),
-//                                    rstampil.getDouble("bagian_rs"),
-//                                    rstampil.getDouble("bhp"),
-//                                    rstampil.getDouble("bagian_perujuk"),
-//                                    rstampil.getDouble("bagian_dokter"),
-//                                    rstampil.getDouble("bagian_laborat"),
-//                                    rstampil.getDouble("kso"),
-//                                    rstampil.getDouble("menejemen"),
-//                                    tbTarif.getValueAt(i2, 1).toString()
-//                                });
-//                            }
-//                        } catch (Exception e) {
-//                            System.out.println("Notif : " + e);
-//                        } finally {
-//                            if (rstindakan != null) {
-//                                rstindakan.close();
-//                            }
-//                            if (pstindakan != null) {
-//                                pstindakan.close();
-//                            }
-//                        }
-//                    }
-//                } catch (Exception e) {
-//                    System.out.println("Notifikasi : " + e);
-//                } finally {
-//                    if (rstampil != null) {
-//                        rstampil.close();
-//                    }
-//                    if (pstampil != null) {
-//                        pstampil.close();
-//                    }
-//                }                      
-//            }
-//        }
-//    } catch (Exception e) {
-//        System.out.println("Error Detail : " + e);
-//    }
-//}    
-//    
-//    private void tampilELIMS(String order) { 
-//        try {
-//            koneksielims=koneksiDBELIMS.condb();
-//            Valid.tabelKosong(tabMode);
-//            
-//            for(i2=0;i2<tbTarif.getRowCount();i2++){ 
-//                if(tbTarif.getValueAt(i2,0).toString().equals("true")){
-//                    tabMode.addRow(new Object[]{true,tbTarif.getValueAt(i2,2).toString(),"","","","","",0,0,0,0,0,0,0,0,""});
-//                    pstampil=koneksi.prepareStatement(
-//                            "select template_laboratorium.id_template, template_laboratorium.Pemeriksaan, "+
-//                            "template_laboratorium.satuan, template_laboratorium.nilai_rujukan_ld,"+
-//                            "template_laboratorium.biaya_item,template_laboratorium.bagian_rs,"+
-//                            "template_laboratorium.bhp,template_laboratorium.bagian_perujuk,"+
-//                            "template_laboratorium.bagian_dokter,template_laboratorium.bagian_laborat,"+
-//                            "template_laboratorium.kso,template_laboratorium.menejemen "+
-//                            "from template_laboratorium inner join permintaan_detail_permintaan_lab on "+
-//                            "permintaan_detail_permintaan_lab.id_template=template_laboratorium.id_template "+
-//                            "where template_laboratorium.kd_jenis_prw=? and template_laboratorium.Pemeriksaan like ? "+
-//                            "and permintaan_detail_permintaan_lab.noorder=? order by urut");
-//                    try {
-//                        pstampil.setString(1,tbTarif.getValueAt(i2,1).toString());
-//                        pstampil.setString(2,"%"+TCari.getText().trim()+"%");
-//                        pstampil.setString(3,order);
-//                        rstampil=pstampil.executeQuery();
-//                        while(rstampil.next()){
-//                            pstindakan=koneksielims.prepareStatement("select detail_hasil_lab.noorder,detail_hasil_lab.kd_jenis_prw,detail_hasil_lab.id_template,detail_hasil_lab.nilai,detail_hasil_lab.nilai_rujukan,detail_hasil_lab.keterangan from detail_hasil_lab where detail_hasil_lab.noorder=? and detail_hasil_lab.id_template=?");
-//                            try {
-//                                pstindakan.setString(1,order);
-//                                pstindakan.setString(2,rstampil.getString("id_template"));
-//                                rstindakan=pstindakan.executeQuery();
-//                                if(rstindakan.next()){
-//                                    tabMode.addRow(new Object[]{
-//                                        true,"   "+rstampil.getString("Pemeriksaan"),rstindakan.getString("nilai"),rstampil.getString("satuan"),
-//                                        rstindakan.getString("nilai_rujukan"),rstindakan.getString("keterangan"),rstampil.getString("id_template"),
-//                                        rstampil.getDouble("biaya_item"),rstampil.getDouble("bagian_rs"),rstampil.getDouble("bhp"),rstampil.getDouble("bagian_perujuk"),
-//                                        rstampil.getDouble("bagian_dokter"),rstampil.getDouble("bagian_laborat"),rstampil.getDouble("kso"),
-//                                        rstampil.getDouble("menejemen"),tbTarif.getValueAt(i2,1).toString()
-//                                    });
-//                                        
-//                                }
-//                            } catch (Exception e) {
-//                                System.out.println("Notif : "+e);
-//                            } finally{
-//                                if(rstindakan!=null){
-//                                    rstindakan.close();
-//                                }
-//                                if(pstindakan!=null){
-//                                    pstindakan.close();
-//                                }
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        System.out.println("Notifikasi : "+e);
-//                    } finally{
-//                        if(rstampil!=null){
-//                            rstampil.close();
-//                        }
-//                        if(pstampil!=null){
-//                            pstampil.close();
-//                        }
-//                    }                      
-//                }
-//            }
-//        } catch (Exception e) {
-//            System.out.println("Error Detail : "+e);
-//        }
-//        
-//    }
- 
-    // Ini kostume yang bener 
-//private void tampilSysmex(String order) { 
-//    try {
-//        koneksisysmex = koneksiDBSysmex.condb();
-//        Valid.tabelKosong(tabMode);
-//        
-//        for (i2 = 0; i2 < tbTarif.getRowCount(); i2++) { 
-//            if (tbTarif.getValueAt(i2, 0).toString().equals("true")) {
-//                System.out.println("Pemeriksaan Laborat : " + tbTarif.getValueAt(i2, 1).toString() + " " + tbTarif.getValueAt(i2, 2).toString());
-//                tabMode.addRow(new Object[]{
-//                    true, tbTarif.getValueAt(i2, 2).toString(), 
-//                    "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, ""
-//                });
-//                
-//                pstampil = koneksi.prepareStatement(
-//                    "select template_laboratorium.id_template, template_laboratorium.Pemeriksaan, " +
-//                    "template_laboratorium.satuan, template_laboratorium.nilai_rujukan_ld, " +
-//                    "template_laboratorium.biaya_item, template_laboratorium.bagian_rs, " +
-//                    "template_laboratorium.bhp, template_laboratorium.bagian_perujuk, " +
-//                    "template_laboratorium.bagian_dokter, template_laboratorium.bagian_laborat, " +
-//                    "template_laboratorium.kso, template_laboratorium.menejemen " +
-//                    "from template_laboratorium inner join permintaan_detail_permintaan_lab on " +
-//                    "permintaan_detail_permintaan_lab.id_template=template_laboratorium.id_template " +
-//                    "where template_laboratorium.kd_jenis_prw=? and permintaan_detail_permintaan_lab.noorder=? " +
-//                    (TCari.getText().trim().equals("") ? "" : "and template_laboratorium.Pemeriksaan like ? ") +
-//                    "order by urut");
-//                try {
-//                    pstampil.setString(1, tbTarif.getValueAt(i2, 1).toString());
-//                    pstampil.setString(2, order);
-//                    if (!TCari.getText().trim().equals("")) {
-//                        pstampil.setString(3, "%" + TCari.getText().trim() + "%");
-//                    }
-//                    rstampil = pstampil.executeQuery();
-//                    while (rstampil.next()) {
-//                        System.out.println("ID Detail Laborat RS : " + rstampil.getString("id_template") + " " + rstampil.getString("Pemeriksaan"));
-//                        
-//                        // 1. Ambil data mapping (nama test & parent) secara aman dari DB Sysmex atau DB SIMRS
-//                        String itemParent = "";
-//                        String sysmexTestNm = "";
-//                        PreparedStatement psMapping = null;
-//                        ResultSet rsMapping = null;
-//                        
-//                        // List koneksi database yang dicoba (Sysmex & SIMRS)
-//                        Connection[] koneksiList = {koneksisysmex, koneksi};
-//                        boolean mappingFound = false;
-//                        
-//                        for (Connection conn : koneksiList) {
-//                            if (conn == null) continue;
-//                            if (mappingFound) break;
-//                            
-//                            // SKENARIO A: Coba ambil kolom sysmex_test_nm dan sysmex_item_parent
-//                            try {
-//                                psMapping = conn.prepareStatement(
-//                                    "select sysmex_test_nm, sysmex_item_parent from mapping_template_sysmex where id_template=?");
-//                                psMapping.setString(1, rstampil.getString("id_template"));
-//                                rsMapping = psMapping.executeQuery();
-//                                if (rsMapping.next()) {
-//                                    sysmexTestNm = rsMapping.getString("sysmex_test_nm");
-//                                    itemParent = rsMapping.getString("sysmex_item_parent");
-//                                    mappingFound = true;
-//                                }
-//                            } catch (Exception e) {
-//                                // SKENARIO B: Jika kolom sysmex_test_nm belum dibuat/tidak ada di tabel, ambil item_parent saja
-//                                try {
-//                                    if (rsMapping != null) rsMapping.close();
-//                                    if (psMapping != null) psMapping.close();
-//                                    
-//                                    psMapping = conn.prepareStatement(
-//                                        "select sysmex_item_parent from mapping_template_sysmex where id_template=?");
-//                                    psMapping.setString(1, rstampil.getString("id_template"));
-//                                    rsMapping = psMapping.executeQuery();
-//                                    if (rsMapping.next()) {
-//                                        itemParent = rsMapping.getString("sysmex_item_parent");
-//                                        mappingFound = true;
-//                                    }
-//                                } catch (Exception ex) {
-//                                    // Gagal pada koneksi ini, lanjut ke koneksi berikutnya
-//                                }
-//                            } finally {
-//                                try {
-//                                    if (rsMapping != null) rsMapping.close();
-//                                    if (psMapping != null) psMapping.close();
-//                                } catch (Exception ex) {}
-//                            }
-//                        }
-//                        
-//                        // Tentukan nama pemeriksaan untuk query ke Sysmex
-//                        String testNameQuery = rstampil.getString("Pemeriksaan");
-//                        if (sysmexTestNm != null && !sysmexTestNm.trim().equals("")) {
-//                            testNameQuery = sysmexTestNm;
-//                        }
-//                        
-//                        // 2. Eksekusi Query ke Sysmex dengan Mekanisme Fallback
-//                        boolean dataDitemukan = false;
-//                        String sqlSysmex = "";
-//                        
-//                        // FASE 1: Query menggunakan filter ITEM_PARENT (jika ada pemetaan parent)
-//                        if (itemParent != null && !itemParent.equals("")) {
-//                            sqlSysmex = "select RESDT.ORDER_TESTID, RESDT.DATA_TYP, RESDT.RESULT_VALUE, " +
-//                                        "RESDT.RESULT_FT, RESDT.UNIT, RESDT.FLAG, RESDT.REF_RANGE " +
-//                                        "from RESDT where RESDT.ONO=? and RESDT.TEST_NM=? and RESDT.ITEM_PARENT=?";
-//                            
-//                            pstindakan = koneksisysmex.prepareStatement(sqlSysmex);
-//                            try {
-//                                pstindakan.setString(1, order);
-//                                pstindakan.setString(2, testNameQuery);
-//                                pstindakan.setString(3, itemParent);
-//                                
-//                                System.out.println("Menjalankan Query (Filter Parent): " + 
-//                                    sqlSysmex.replaceFirst("\\?", "'" + order + "'").replaceFirst("\\?", "'" + testNameQuery + "'") + 
-//                                    " [ITEM_PARENT=" + itemParent + "]");
-//                                
-//                                rstindakan = pstindakan.executeQuery();
-//                                if (rstindakan.next()) {
-//                                    dataDitemukan = true;
-//                                    
-//                                    // Proses & Tampilkan Hasil
-//                                    String flag = rstindakan.getString("FLAG");
-//                                    flag = (flag != null) ? flag.replaceAll("LL", "L").replaceAll("HH", "H") : "";
-//                                    
-//                                    String hasil = (rstindakan.getString("DATA_TYP") != null && rstindakan.getString("DATA_TYP").equals("FT")) ? 
-//                                        rstindakan.getString("RESULT_FT") : rstindakan.getString("RESULT_VALUE");
-//                                        
-//                                    tabMode.addRow(new Object[]{
-//                                        true, "   " + rstampil.getString("Pemeriksaan"), hasil,
-//                                        rstindakan.getString("UNIT"), rstindakan.getString("REF_RANGE"), flag,
-//                                        rstampil.getString("id_template"), rstampil.getDouble("biaya_item"),
-//                                        rstampil.getDouble("bagian_rs"), rstampil.getDouble("bhp"),
-//                                        rstampil.getDouble("bagian_perujuk"), rstampil.getDouble("bagian_dokter"),
-//                                        rstampil.getDouble("bagian_laborat"), rstampil.getDouble("kso"),
-//                                        rstampil.getDouble("menejemen"), tbTarif.getValueAt(i2, 1).toString()
-//                                    });
-//                                }
-//                            } catch (Exception e) {
-//                                System.out.println("Notif FASE 1 : " + e);
-//                            } finally {
-//                                if (rstindakan != null) rstindakan.close();
-//                                if (pstindakan != null) pstindakan.close();
-//                            }
-//                        }
-//                        
-//                        // FASE 2 (FALLBACK): Jika FASE 1 tidak menemukan data (atau itemParent kosong), 
-//                        // cari data hanya menggunakan ONO dan nama pemeriksaan
-//                        if (!dataDitemukan) {
-//                            sqlSysmex = "select RESDT.ORDER_TESTID, RESDT.DATA_TYP, RESDT.RESULT_VALUE, " +
-//                                        "RESDT.RESULT_FT, RESDT.UNIT, RESDT.FLAG, RESDT.REF_RANGE " +
-//                                        "from RESDT where RESDT.ONO=? and RESDT.TEST_NM=?";
-//                                        
-//                            pstindakan = koneksisysmex.prepareStatement(sqlSysmex);
-//                            try {
-//                                pstindakan.setString(1, order);
-//                                pstindakan.setString(2, testNameQuery);
-//                                
-//                                System.out.println("Menjalankan Query Fallback (Tanpa Parent): " + 
-//                                    sqlSysmex.replaceFirst("\\?", "'" + order + "'").replaceFirst("\\?", "'" + testNameQuery + "'"));
-//                                    
-//                                rstindakan = pstindakan.executeQuery();
-//                                if (rstindakan.next()) {
-//                                    dataDitemukan = true;
-//                                    
-//                                    // Proses & Tampilkan Hasil
-//                                    String flag = rstindakan.getString("FLAG");
-//                                    flag = (flag != null) ? flag.replaceAll("LL", "L").replaceAll("HH", "H") : "";
-//                                    
-//                                    String hasil = (rstindakan.getString("DATA_TYP") != null && rstindakan.getString("DATA_TYP").equals("FT")) ? 
-//                                        rstindakan.getString("RESULT_FT") : rstindakan.getString("RESULT_VALUE");
-//                                        
-//                                    tabMode.addRow(new Object[]{
-//                                        true, "   " + rstampil.getString("Pemeriksaan"), hasil,
-//                                        rstindakan.getString("UNIT"), rstindakan.getString("REF_RANGE"), flag,
-//                                        rstampil.getString("id_template"), rstampil.getDouble("biaya_item"),
-//                                        rstampil.getDouble("bagian_rs"), rstampil.getDouble("bhp"),
-//                                        rstampil.getDouble("bagian_perujuk"), rstampil.getDouble("bagian_dokter"),
-//                                        rstampil.getDouble("bagian_laborat"), rstampil.getDouble("kso"),
-//                                        rstampil.getDouble("menejemen"), tbTarif.getValueAt(i2, 1).toString()
-//                                    });
-//                                }
-//                            } catch (Exception e) {
-//                                System.out.println("Notif FASE 2 : " + e);
-//                            } finally {
-//                                if (rstindakan != null) rstindakan.close();
-//                                if (pstindakan != null) pstindakan.close();
-//                            }
-//                        }
-//                    }
-//                } catch (Exception e) {
-//                    System.out.println("Notifikasi : " + e);
-//                } finally {
-//                    if (rstampil != null) rstampil.close();
-//                    if (pstampil != null) pstampil.close();
-//                }                      
-//            }
-//        }
-//    } catch (Exception e) {
-//        System.out.println("Error Detail : " + e);
-//    }
-//}  
-
-private void tampilSysmex(String order) { 
-    try {
-        koneksisysmex = koneksiDBSysmex.condb();
-        Valid.tabelKosong(tabMode);
-        
-        for (i2 = 0; i2 < tbTarif.getRowCount(); i2++) { 
-            if (tbTarif.getValueAt(i2, 0).toString().equals("true")) {
-                System.out.println("Pemeriksaan Laborat : " + tbTarif.getValueAt(i2, 1).toString() + " " + tbTarif.getValueAt(i2, 2).toString());
-                
-                // MEWARNAI PARAMETER UTAMA (Bold & Biru Gelap)
-                tabMode.addRow(new Object[]{
-                    true, 
-                    "<html><b><font color='#1a365d'>" + tbTarif.getValueAt(i2, 2).toString() + "</font></b></html>", 
-                    "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, ""
-                });
-                
-                pstampil = koneksi.prepareStatement(
-                    "select template_laboratorium.id_template, template_laboratorium.Pemeriksaan, " +
-                    "template_laboratorium.satuan, template_laboratorium.nilai_rujukan_ld, " +
-                    "template_laboratorium.biaya_item, template_laboratorium.bagian_rs, " +
-                    "template_laboratorium.bhp, template_laboratorium.bagian_perujuk, " +
-                    "template_laboratorium.bagian_dokter, template_laboratorium.bagian_laborat, " +
-                    "template_laboratorium.kso, template_laboratorium.menejemen " +
-                    "from template_laboratorium inner join permintaan_detail_permintaan_lab on " +
-                    "permintaan_detail_permintaan_lab.id_template=template_laboratorium.id_template " +
-                    "where template_laboratorium.kd_jenis_prw=? and permintaan_detail_permintaan_lab.noorder=? " +
-                    (TCari.getText().trim().equals("") ? "" : "and template_laboratorium.Pemeriksaan like ? ") +
-                    "order by urut");
-                try {
-                    pstampil.setString(1, tbTarif.getValueAt(i2, 1).toString());
-                    pstampil.setString(2, order);
-                    if (!TCari.getText().trim().equals("")) {
-                        pstampil.setString(3, "%" + TCari.getText().trim() + "%");
-                    }
-                    rstampil = pstampil.executeQuery();
-                    while (rstampil.next()) {
-                        System.out.println("ID Detail Laborat RS : " + rstampil.getString("id_template") + " " + rstampil.getString("Pemeriksaan"));
-                        
-                        // 1. Ambil data mapping secara aman
-                        String itemParent = "";
-                        String sysmexTestNm = "";
-                        PreparedStatement psMapping = null;
-                        ResultSet rsMapping = null;
-                        
-                        Connection[] koneksiList = {koneksisysmex, koneksi};
-                        boolean mappingFound = false;
-                        
-                        for (Connection conn : koneksiList) {
-                            if (conn == null) continue;
-                            if (mappingFound) break;
-                            
+    private void tampilSysmex(String order) { 
+        try {
+            koneksisysmex=koneksiDBSysmex.condb();
+            Valid.tabelKosong(tabMode);
+            
+            for(i2=0;i2<tbTarif.getRowCount();i2++){ 
+                if(tbTarif.getValueAt(i2,0).toString().equals("true")){
+                    System.out.println("Pemeriksaan Laborat : "+tbTarif.getValueAt(i2,1).toString()+" "+tbTarif.getValueAt(i2,2).toString());
+                    tabMode.addRow(new Object[]{true,tbTarif.getValueAt(i2,2).toString(),"","","","","",0,0,0,0,0,0,0,0,""});
+                    pstampil=koneksi.prepareStatement(
+                            "select template_laboratorium.id_template, template_laboratorium.Pemeriksaan, "+
+                            "template_laboratorium.satuan, template_laboratorium.nilai_rujukan_ld,"+
+                            "template_laboratorium.biaya_item,template_laboratorium.bagian_rs,"+
+                            "template_laboratorium.bhp,template_laboratorium.bagian_perujuk,"+
+                            "template_laboratorium.bagian_dokter,template_laboratorium.bagian_laborat,"+
+                            "template_laboratorium.kso,template_laboratorium.menejemen "+
+                            "from template_laboratorium inner join permintaan_detail_permintaan_lab on "+
+                            "permintaan_detail_permintaan_lab.id_template=template_laboratorium.id_template "+
+                            "where template_laboratorium.kd_jenis_prw=? and permintaan_detail_permintaan_lab.noorder=? "+
+                            (TCari.getText().trim().equals("")?"":"and template_laboratorium.Pemeriksaan like ? ")+
+                            "order by urut");
+                    try {
+                        pstampil.setString(1,tbTarif.getValueAt(i2,1).toString());
+                        pstampil.setString(2,order);
+                        if(!TCari.getText().trim().equals("")){
+                            pstampil.setString(3,"%"+TCari.getText().trim()+"%");
+                        }
+                        rstampil=pstampil.executeQuery();
+                        while(rstampil.next()){
+                            System.out.println("ID Detail Laborat RS : "+rstampil.getString("id_template")+" "+rstampil.getString("Pemeriksaan"));
+                            pstindakan=koneksisysmex.prepareStatement("select RESDT.ORDER_TESTID,RESDT.DATA_TYP,RESDT.RESULT_VALUE,RESDT.RESULT_FT,RESDT.UNIT,RESDT.FLAG,RESDT.REF_RANGE from RESDT where RESDT.ONO=? and RESDT.TEST_NM=?");
                             try {
-                                psMapping = conn.prepareStatement(
-                                    "select sysmex_test_nm, sysmex_item_parent from mapping_template_sysmex where id_template=?");
-                                psMapping.setString(1, rstampil.getString("id_template"));
-                                rsMapping = psMapping.executeQuery();
-                                if (rsMapping.next()) {
-                                    sysmexTestNm = rsMapping.getString("sysmex_test_nm");
-                                    itemParent = rsMapping.getString("sysmex_item_parent");
-                                    mappingFound = true;
+                                pstindakan.setString(1,order);
+                                pstindakan.setString(2,rstampil.getString("Pemeriksaan"));
+                                rstindakan=pstindakan.executeQuery();
+                                System.out.println("Menjalankan Query : select RESDT.ORDER_TESTID,RESDT.DATA_TYP,RESDT.RESULT_VALUE,RESDT.RESULT_FT,RESDT.UNIT,RESDT.FLAG,RESDT.REF_RANGE from RESDT where RESDT.ONO='"+order+"' and RESDT.TEST_NM='"+rstampil.getString("Pemeriksaan")+"'");
+                                if(rstindakan.next()){
+                                    System.out.println("ID Detail Laborat Sysmex Yang Ditemukan : "+rstindakan.getString("ORDER_TESTID"));
+                                    if(rstindakan.getString("DATA_TYP").equals("FT")){
+                                        tabMode.addRow(new Object[]{
+                                            true,"   "+rstampil.getString("Pemeriksaan"),rstindakan.getString("RESULT_FT"),rstindakan.getString("UNIT"),
+                                            rstindakan.getString("REF_RANGE"),rstindakan.getString("FLAG").replaceAll("LL","L").replaceAll("HH","H"),
+                                            rstampil.getString("id_template"),rstampil.getDouble("biaya_item"),rstampil.getDouble("bagian_rs"),
+                                            rstampil.getDouble("bhp"),rstampil.getDouble("bagian_perujuk"),rstampil.getDouble("bagian_dokter"),
+                                            rstampil.getDouble("bagian_laborat"),rstampil.getDouble("kso"),rstampil.getDouble("menejemen"),
+                                            tbTarif.getValueAt(i2,1).toString()
+                                        });
+                                    }else{
+                                        tabMode.addRow(new Object[]{
+                                            true,"   "+rstampil.getString("Pemeriksaan"),rstindakan.getString("RESULT_VALUE"),rstindakan.getString("UNIT"),
+                                            rstindakan.getString("REF_RANGE"),rstindakan.getString("FLAG").replaceAll("LL","L").replaceAll("HH","H"),
+                                            rstampil.getString("id_template"),rstampil.getDouble("biaya_item"),rstampil.getDouble("bagian_rs"),
+                                            rstampil.getDouble("bhp"),rstampil.getDouble("bagian_perujuk"),rstampil.getDouble("bagian_dokter"),
+                                            rstampil.getDouble("bagian_laborat"),rstampil.getDouble("kso"),rstampil.getDouble("menejemen"),
+                                            tbTarif.getValueAt(i2,1).toString()
+                                        });
+                                    }   
                                 }
                             } catch (Exception e) {
-                                try {
-                                    if (rsMapping != null) rsMapping.close();
-                                    if (psMapping != null) psMapping.close();
-                                    
-                                    psMapping = conn.prepareStatement(
-                                        "select sysmex_item_parent from mapping_template_sysmex where id_template=?");
-                                    psMapping.setString(1, rstampil.getString("id_template"));
-                                    rsMapping = psMapping.executeQuery();
-                                    if (rsMapping.next()) {
-                                        itemParent = rsMapping.getString("sysmex_item_parent");
-                                        mappingFound = true;
-                                    }
-                                } catch (Exception ex) {}
-                            } finally {
-                                try {
-                                    if (rsMapping != null) rsMapping.close();
-                                    if (psMapping != null) psMapping.close();
-                                } catch (Exception ex) {}
-                            }
-                        }
-                        
-                        String testNameQuery = rstampil.getString("Pemeriksaan");
-                        if (sysmexTestNm != null && !sysmexTestNm.trim().equals("")) {
-                            testNameQuery = sysmexTestNm;
-                        }
-                        
-                        // 2. Eksekusi Query & Tampilkan Hasil
-                        boolean dataDitemukan = false;
-                        String sqlSysmex = "";
-                        
-                        // FASE 1: Dengan Filter Parent
-                        if (itemParent != null && !itemParent.equals("")) {
-                            sqlSysmex = "select RESDT.ORDER_TESTID, RESDT.DATA_TYP, RESDT.RESULT_VALUE, " +
-                                        "RESDT.RESULT_FT, RESDT.UNIT, RESDT.FLAG, RESDT.REF_RANGE " +
-                                        "from RESDT where RESDT.ONO=? and RESDT.TEST_NM=? and RESDT.ITEM_PARENT=?";
-                            
-                            pstindakan = koneksisysmex.prepareStatement(sqlSysmex);
-                            try {
-                                pstindakan.setString(1, order);
-                                pstindakan.setString(2, testNameQuery);
-                                pstindakan.setString(3, itemParent);
-                                
-                                rstindakan = pstindakan.executeQuery();
-                                if (rstindakan.next()) {
-                                    dataDitemukan = true;
-                                    
-                                    String flag = rstindakan.getString("FLAG");
-                                    flag = (flag != null) ? flag.replaceAll("LL", "L").replaceAll("HH", "H") : "";
-                                    
-                                    String hasil = (rstindakan.getString("DATA_TYP") != null && rstindakan.getString("DATA_TYP").equals("FT")) ? 
-                                        rstindakan.getString("RESULT_FT") : rstindakan.getString("RESULT_VALUE");
-                                    
-                                    // MEWARNAI SUB-PARAMETER (Indented & Abu-abu Gelap)
-                                    tabMode.addRow(new Object[]{
-                                        true, 
-                                        "<html>&nbsp;&nbsp;&nbsp;<font color='#2d3748'>" + rstampil.getString("Pemeriksaan") + "</font></html>", 
-                                        hasil,
-                                        rstindakan.getString("UNIT"), rstindakan.getString("REF_RANGE"), flag,
-                                        rstampil.getString("id_template"), rstampil.getDouble("biaya_item"),
-                                        rstampil.getDouble("bagian_rs"), rstampil.getDouble("bhp"),
-                                        rstampil.getDouble("bagian_perujuk"), rstampil.getDouble("bagian_dokter"),
-                                        rstampil.getDouble("bagian_laborat"), rstampil.getDouble("kso"),
-                                        rstampil.getDouble("menejemen"), tbTarif.getValueAt(i2, 1).toString()
-                                    });
+                                System.out.println("Notif : "+e);
+                            } finally{
+                                if(rstindakan!=null){
+                                    rstindakan.close();
                                 }
-                            } catch (Exception e) {
-                                System.out.println("Notif FASE 1 : " + e);
-                            } finally {
-                                if (rstindakan != null) rstindakan.close();
-                                if (pstindakan != null) pstindakan.close();
-                            }
-                        }
-                        
-                        // FASE 2: Fallback Tanpa Filter Parent
-                        if (!dataDitemukan) {
-                            sqlSysmex = "select RESDT.ORDER_TESTID, RESDT.DATA_TYP, RESDT.RESULT_VALUE, " +
-                                        "RESDT.RESULT_FT, RESDT.UNIT, RESDT.FLAG, RESDT.REF_RANGE " +
-                                        "from RESDT where RESDT.ONO=? and RESDT.TEST_NM=?";
-                                        
-                            pstindakan = koneksisysmex.prepareStatement(sqlSysmex);
-                            try {
-                                pstindakan.setString(1, order);
-                                pstindakan.setString(2, testNameQuery);
-                                
-                                rstindakan = pstindakan.executeQuery();
-                                if (rstindakan.next()) {
-                                    dataDitemukan = true;
-                                    
-                                    String flag = rstindakan.getString("FLAG");
-                                    flag = (flag != null) ? flag.replaceAll("LL", "L").replaceAll("HH", "H") : "";
-                                    
-                                    String hasil = (rstindakan.getString("DATA_TYP") != null && rstindakan.getString("DATA_TYP").equals("FT")) ? 
-                                        rstindakan.getString("RESULT_FT") : rstindakan.getString("RESULT_VALUE");
-                                        
-                                    // MEWARNAI SUB-PARAMETER (Indented & Abu-abu Gelap)
-                                    tabMode.addRow(new Object[]{
-                                        true, 
-                                        "<html>&nbsp;&nbsp;&nbsp;<font color='#2d3748'>" + rstampil.getString("Pemeriksaan") + "</font></html>", 
-                                        hasil,
-                                        rstindakan.getString("UNIT"), rstindakan.getString("REF_RANGE"), flag,
-                                        rstampil.getString("id_template"), rstampil.getDouble("biaya_item"),
-                                        rstampil.getDouble("bagian_rs"), rstampil.getDouble("bhp"),
-                                        rstampil.getDouble("bagian_perujuk"), rstampil.getDouble("bagian_dokter"),
-                                        rstampil.getDouble("bagian_laborat"), rstampil.getDouble("kso"),
-                                        rstampil.getDouble("menejemen"), tbTarif.getValueAt(i2, 1).toString()
-                                    });
+                                if(pstindakan!=null){
+                                    pstindakan.close();
                                 }
-                            } catch (Exception e) {
-                                System.out.println("Notif FASE 2 : " + e);
-                            } finally {
-                                if (rstindakan != null) rstindakan.close();
-                                if (pstindakan != null) pstindakan.close();
                             }
                         }
-                    }
-                } catch (Exception e) {
-                    System.out.println("Notifikasi : " + e);
-                } finally {
-                    if (rstampil != null) rstampil.close();
-                    if (pstampil != null) pstampil.close();
-                }                      
+                    } catch (Exception e) {
+                        System.out.println("Notifikasi : "+e);
+                    } finally{
+                        if(rstampil!=null){
+                            rstampil.close();
+                        }
+                        if(pstampil!=null){
+                            pstampil.close();
+                        }
+                    }                      
+                }
             }
+        } catch (Exception e) {
+            System.out.println("Error Detail : "+e);
         }
-    } catch (Exception e) {
-        System.out.println("Error Detail : " + e);
+        
     }
-}    
     
+    private void tampilELIMS(String order) { 
+        try {
+            koneksielims=koneksiDBELIMS.condb();
+            Valid.tabelKosong(tabMode);
+            
+            for(i2=0;i2<tbTarif.getRowCount();i2++){ 
+                if(tbTarif.getValueAt(i2,0).toString().equals("true")){
+                    tabMode.addRow(new Object[]{true,tbTarif.getValueAt(i2,2).toString(),"","","","","",0,0,0,0,0,0,0,0,""});
+                    pstampil=koneksi.prepareStatement(
+                            "select template_laboratorium.id_template, template_laboratorium.Pemeriksaan, "+
+                            "template_laboratorium.satuan, template_laboratorium.nilai_rujukan_ld,"+
+                            "template_laboratorium.biaya_item,template_laboratorium.bagian_rs,"+
+                            "template_laboratorium.bhp,template_laboratorium.bagian_perujuk,"+
+                            "template_laboratorium.bagian_dokter,template_laboratorium.bagian_laborat,"+
+                            "template_laboratorium.kso,template_laboratorium.menejemen "+
+                            "from template_laboratorium inner join permintaan_detail_permintaan_lab on "+
+                            "permintaan_detail_permintaan_lab.id_template=template_laboratorium.id_template "+
+                            "where template_laboratorium.kd_jenis_prw=? and template_laboratorium.Pemeriksaan like ? "+
+                            "and permintaan_detail_permintaan_lab.noorder=? order by urut");
+                    try {
+                        pstampil.setString(1,tbTarif.getValueAt(i2,1).toString());
+                        pstampil.setString(2,"%"+TCari.getText().trim()+"%");
+                        pstampil.setString(3,order);
+                        rstampil=pstampil.executeQuery();
+                        while(rstampil.next()){
+                            pstindakan=koneksielims.prepareStatement("select detail_hasil_lab.noorder,detail_hasil_lab.kd_jenis_prw,detail_hasil_lab.id_template,detail_hasil_lab.nilai,detail_hasil_lab.nilai_rujukan,detail_hasil_lab.keterangan from detail_hasil_lab where detail_hasil_lab.noorder=? and detail_hasil_lab.id_template=?");
+                            try {
+                                pstindakan.setString(1,order);
+                                pstindakan.setString(2,rstampil.getString("id_template"));
+                                rstindakan=pstindakan.executeQuery();
+                                if(rstindakan.next()){
+                                    tabMode.addRow(new Object[]{
+                                        true,"   "+rstampil.getString("Pemeriksaan"),rstindakan.getString("nilai"),rstampil.getString("satuan"),
+                                        rstindakan.getString("nilai_rujukan"),rstindakan.getString("keterangan"),rstampil.getString("id_template"),
+                                        rstampil.getDouble("biaya_item"),rstampil.getDouble("bagian_rs"),rstampil.getDouble("bhp"),rstampil.getDouble("bagian_perujuk"),
+                                        rstampil.getDouble("bagian_dokter"),rstampil.getDouble("bagian_laborat"),rstampil.getDouble("kso"),
+                                        rstampil.getDouble("menejemen"),tbTarif.getValueAt(i2,1).toString()
+                                    });
+                                        
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Notif : "+e);
+                            } finally{
+                                if(rstindakan!=null){
+                                    rstindakan.close();
+                                }
+                                if(pstindakan!=null){
+                                    pstindakan.close();
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Notifikasi : "+e);
+                    } finally{
+                        if(rstampil!=null){
+                            rstampil.close();
+                        }
+                        if(pstampil!=null){
+                            pstampil.close();
+                        }
+                    }                      
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error Detail : "+e);
+        }
+        
+    }
     
     private void tampilSLIMS(String order) { 
         try {
@@ -3396,7 +2838,7 @@ private void tampilSysmex(String order) {
         }
         isPsien();
         tampiltarif(order);
-//        tampilELIMS(order);
+        tampilELIMS(order);
     }
     
     public void setOrderSLIMS(String order,String norawat,String posisi){

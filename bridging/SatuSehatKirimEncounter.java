@@ -557,17 +557,6 @@ public final class SatuSehatKirimEncounter extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_BtnCariKeyPressed
 
-    private static String toUtc(String wibIso) {
-        if (wibIso == null || wibIso.isEmpty()) return wibIso;
-        try {
-            java.time.OffsetDateTime odt = java.time.OffsetDateTime.parse(wibIso);
-            return odt.withOffsetSameInstant(java.time.ZoneOffset.UTC)
-                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssxxx"));
-        } catch (Exception e) {
-            return wibIso;
-        }
-    }
-    
     private void BtnKirimActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnKirimActionPerformed
         for(i=0;i<tbObat.getRowCount();i++){
             if(tbObat.getValueAt(i,0).toString().equals("true")&&(!tbObat.getValueAt(i,5).toString().equals(""))&&(!tbObat.getValueAt(i,8).toString().equals(""))&&tbObat.getValueAt(i,15).toString().equals("")){
@@ -833,7 +822,7 @@ public final class SatuSehatKirimEncounter extends javax.swing.JDialog {
     }//GEN-LAST:event_ppBersihkanActionPerformed
 
     private void BtnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnUpdateActionPerformed
-       for(i=0;i<tbObat.getRowCount();i++){
+        for(i=0;i<tbObat.getRowCount();i++){
             if(tbObat.getValueAt(i,0).toString().equals("true")&&(!tbObat.getValueAt(i,5).toString().equals(""))&&(!tbObat.getValueAt(i,8).toString().equals(""))&&(!tbObat.getValueAt(i,15).toString().equals(""))){
                 try {
                     iddokter=cekViaSatuSehat.tampilIDParktisi(tbObat.getValueAt(i,8).toString());
@@ -1051,33 +1040,6 @@ public final class SatuSehatKirimEncounter extends javax.swing.JDialog {
         }
         LCount.setText(""+tabMode.getRowCount());
     }
-    
-    /** @deprecated logic dipindah ke SatuSehatEpisodeOfCareHelper.getTypeByPoli().
-     *  Method ini sengaja dibiarkan stub (return null) untuk backward-compat
-     *  kalau ada caller lain yang masih panggil; hapus full body. */
-    @SuppressWarnings("unused")
-    private String getEpisodeOfCareType_DEPRECATED(String nmPoli) {
-        String poli = nmPoli == null ? "" : nmPoli.toLowerCase();
-        if(poli.contains("anc"))         return "ANC|Antenatal Care";
-        if(poli.contains("pnc"))         return "PNC|Postnatal Care";
-        if(poli.contains("tb") || poli.contains("tuberkulosis") || poli.contains("tbc") || poli.contains("paru"))
-                                         return "TB-DOTS|TB-DOTS Program";
-        if(poli.contains("hiv") || poli.contains("aids") || poli.contains("vct") || poli.contains("cst"))
-                                         return "HIV-AIDS|HIV-AIDS Program";
-        if(poli.contains("hemodial") || poli.contains("dialisis"))
-                                         return "HD|Hemodialysis Program";
-        if(poli.contains("onkologi") || poli.contains("kemoterapi") || poli.contains("kanker"))
-                                         return "ONCO|Oncology Program";
-        if(poli.contains("rehab") || poli.contains("fisioterapi"))
-                                         return "REHAB|Rehabilitation Program";
-        if(poli.contains("jiwa") || poli.contains("psikiatri") || poli.contains("mental"))
-                                         return "MENTAL|Mental Health Program";
-        if(poli.contains("prolanis") || poli.contains("diabetes") || poli.contains("kronis"))
-                                         return "CHRONIC|Chronic Disease Management";
-        return null;
-    }
-
-    
 
     public void isCek(){
         BtnKirim.setEnabled(akses.getsatu_sehat_kirim_encounter());
